@@ -7,7 +7,10 @@ var cors = require('cors');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var adminRouter = require('./routes/admin');
-var venderRouter = require('./routes/vender')
+var venderRouter = require('./routes/vender');
+// const { isatty } = require('tty');
+
+const events = require('events');
 var app = express();
 
 // view engine setup
@@ -45,8 +48,24 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
+
+const myEmitter = new events.EventEmitter();
+
+// new service ressquest event
+ myEmitter.on('NewServiceRequested',(data) =>{   
+ console.log('NewServiceRequested: ' + data);
+ });
+
+ // Raising NewServiceRequested event
+myEmitter.emit('NewServiceRequested', 'This is my first Node.js event emitter example.');
+
 app.listen(process.env.PORT, () => {
   console.log("listening");
 });
 
 module.exports = app;
+
+
+
+
+

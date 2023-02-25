@@ -1320,8 +1320,6 @@ router.post('/updateRegulerService', async function (req, res) {
   }
 });
 
-
-
 router.post('/updateRegulerService_v1', async function (req, res) {
   try {
     const { title, service, regulerServiceId, image, icons } = req.body
@@ -1330,17 +1328,17 @@ router.post('/updateRegulerService_v1', async function (req, res) {
       $match: {
         _id: mongoose.Types.ObjectId(regulerServiceId)
       }
-    },
-    {
-      $lookup: {
-        from: "servicedata2",
-        localField: "_id",
-        foreignField: "regulerServiceId",
-        as: "serviceData"
-      }
     }
+    // {
+    //   $lookup: {
+    //     from: "servicedata2",
+    //     localField: "_id",
+    //     foreignField: "regulerServiceId",
+    //     as: "serviceData"
+    //   }
+    // }
     ]);
-    console.log(update[0].serviceData.length);
+    // console.log(update[0].serviceData.length);
     // service image 
     let imagePath = [];
     if (image != undefined && image != null && image != [] && image != "") {
@@ -1372,10 +1370,10 @@ router.post('/updateRegulerService_v1', async function (req, res) {
     imgIcon = iconNew.pop()
 
     // console.log(update[0].ser);
-    let matchService = update[0].serviceData
+    // let matchService = update[0].serviceData
     // console.log(matchService);
     if (update.length == 1) {
-      // let updateIs;
+      let updateIs;
       updateIs = {
         title: title != undefined ? title : update[0].title,
         service: service != undefined ? service : update[0].service,
@@ -1384,11 +1382,14 @@ router.post('/updateRegulerService_v1', async function (req, res) {
       }
       let updateIss = await regulerService.findByIdAndUpdate(regulerServiceId, updateIs, { new: true })
       if (updateIss) {
-        for (let i = 0; i < matchService.length; i++) {
-          const service = matchService[i];
-          console.log(service._id);
-          let updateIsss = await serviceSchema2.findByIdAndUpdate(service._id, updateIs)
-        }
+        // for (let i = 0; i < matchService.length; i++) {
+        //   const service = matchService[i];
+        //   // console.log(service._id);
+        //   let updateIsss = await serviceSchema2.findByIdAndUpdate(service._id, updateIs)
+        // }
+
+        let updateIsss = await serviceSchema2.updateMany({regulerServiceId:regulerServiceId}, {$set:updateIs})
+        console.log(updateIsss, "updataed")
       }
       return res.status(200).json({ IsSuccess: true, Data: [updateIss], Message: `Updated Data` });
     } else {
@@ -1688,13 +1689,14 @@ router.post('/UpdateTrackBookingStatus', async function (req, res) {
 
 router.post('/addNewCarModel', async function (req, res) {
   try {
-    const { carBrandId, modelName, carTypeId, image } = req.body
+    const { carBrandId, modelName, carTypeId, image, isActive, fuelTypeId } = req.body
 
     let authToken = req.headers['authorization'];
 
     if (authToken != config.tockenIs || authToken == null || authToken == undefined) {
       return res.status(200).json({ IsSuccess: false, Data: [], Message: "You are not authenticated" });
     }
+    
 
     // service image 
     let imagePath = [];
@@ -1710,17 +1712,31 @@ router.post('/addNewCarModel', async function (req, res) {
       }
     }
     img = imagePath.pop()
+
     // service icon
     let add = await new carModelSchema({
       modelName: modelName,
       carBrandId: carBrandId,
       carTypeId: carTypeId,
-      image: img
+      image: img,
+      // isActive :isActive != undefined ? isActive : true
     });
 
+
+
+    // added by jayshri for fuledetails
+    
     if (add != null) {
       await add.save()
-      return res.status(200).json({ IsSuccess: true, Data: [add], Message: 'Added Data' })
+  
+      let addFuel = await new carModelFuelSchema({
+        carModelId: add._id,
+        fuelTypeId: fuelTypeId,
+        image: img
+      });
+      await addFuel.save()
+      // end
+      return res.status(200).json({ IsSuccess: true, Data: [add, addFuel], Message: 'Added Data' })
     } else {
       return res.status(200).json({ IsSuccess: true, Data: [], Message: 'Not Added Data' })
     }
@@ -1833,10 +1849,9 @@ router.post('/getCarModelByCarBrandId', async function (req, res) {
 });
 
 
-
 router.post('/UpdateCarModel', async function (req, res) {
   try {
-    const { carBrandId, modelName, carTypeId, image, carModelId } = req.body
+    const { carBrandId, modelName, carTypeId, image, carModelId, isActive, carModelFuelId , fuelTypeId} = req.body
 
     const update = await carModelSchema.aggregate([{
       $match: {
@@ -1865,10 +1880,34 @@ router.post('/UpdateCarModel', async function (req, res) {
         modelName: modelName != undefined ? modelName : update[0].modelName,
         carBrandId: carBrandId != undefined ? carBrandId : update[0].carBrandId,
         image: img != undefined ? img : update[0].image,
-        carTypeId: carTypeId != undefined ? carTypeId : update[0].carTypeId
+        carTypeId: carTypeId != undefined ? carTypeId : update[0].carTypeId,
+        isActive: isActive != undefined ? isActive : update[0].isActive, // added by jayshri 23 feb 2023
+      
       }
       let updateIss = await carModelSchema.findByIdAndUpdate(carModelId, updateIs, { new: true })
-      return res.status(200).json({ IsSuccess: true, Data: [updateIss], Message: `Updated Data` });
+
+
+      // added by jayshri added for updating carfule details
+      const update1 = await carModelFuelSchema.aggregate([{
+        $match: {
+          _id: mongoose.Types.ObjectId(carModelFuelId)
+        }
+      }
+      ]);
+      
+      let updateIss1
+      if (update1.length == 1) {
+        let updateIs1;
+        updateIs1 = {
+          fuelTypeId: fuelTypeId != undefined ? fuelTypeId : update1[0].fuelTypeId,
+          carModelId: carModelId != undefined ? carModelId : update1[0].carModelId,
+          image: image != undefined ? img : update1[0].image,
+        }
+         updateIss1 = await carModelFuelSchema.findByIdAndUpdate(carModelFuelId, updateIs1, { new: true })
+      }
+      // end
+
+      return res.status(200).json({ IsSuccess: true, Data: [updateIss, updateIss1], Message: `Updated Data` });
     } else {
       return res.status(200).json({ IsSuccess: true, Data: [], Message: 'Not Found' })
     }
