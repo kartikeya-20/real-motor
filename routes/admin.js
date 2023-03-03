@@ -955,9 +955,9 @@ router.post('/updateService', async function (req, res) {
 
 
 // ------------------- Paras -----------------------
+
 router.post('/addNewService_v5', async function (req, res) {
   try {
-    const { title, mrp, currentMrp, discount, service, image, icons, carTypeId, subCategoryId, carModelId, carFualTypeId, deliveryCharges, regulerServiceId } = req.body
 
     let authToken = req.headers['authorization'];
 
@@ -965,28 +965,11 @@ router.post('/addNewService_v5', async function (req, res) {
       return res.status(200).json({ IsSuccess: false, Data: [], Message: "You are not authenticated" });
     }
 
-
-    discounts = ((parseInt(mrp) - parseInt(currentMrp)) / parseInt(mrp)) * 100
-
-    let add = await new serviceSchema2({
-      title: title,
-      mrp: mrp,
-      currentMrp: currentMrp,
-      discount: discount,
-      image: image,
-      icon: icons,
-      service: service,
-      carTypeId: carTypeId,
-      subCategoryId: subCategoryId,
-      carModelId: carModelId,
-      carFualTypeId: carFualTypeId,
-      deliveryCharges: deliveryCharges,
-      regulerServiceId: regulerServiceId
-    });
+    let add = await serviceSchema2.insertMany(req.body);
+    console.log(add)
 
     if (add != null) {
-      await add.save();
-      return res.status(200).json({ IsSuccess: true, Data: [add], Message: 'Added Data' })
+      return res.status(200).json({ IsSuccess: true, Data: add, Message: 'Added Data' })
     } else {
       return res.status(200).json({ IsSuccess: true, Data: [], Message: 'Not Added Data' })
     }
@@ -996,6 +979,49 @@ router.post('/addNewService_v5', async function (req, res) {
   }
 
 });
+
+
+// router.post('/addNewService_v5', async function (req, res) {
+//   try {
+//     const { title, mrp, currentMrp, discount, service, image, icons, carTypeId, subCategoryId, carModelId, carFualTypeId, deliveryCharges, regulerServiceId } = req.body
+
+//     let authToken = req.headers['authorization'];
+
+//     if (authToken != config.tockenIs || authToken == null || authToken == undefined) {
+//       return res.status(200).json({ IsSuccess: false, Data: [], Message: "You are not authenticated" });
+//     }
+
+
+//     discounts = ((parseInt(mrp) - parseInt(currentMrp)) / parseInt(mrp)) * 100
+
+//     let add = await new serviceSchema2({
+//       title: title,
+//       mrp: mrp,
+//       currentMrp: currentMrp,
+//       discount: discount,
+//       image: image,
+//       icon: icons,
+//       service: service,
+//       carTypeId: carTypeId,
+//       subCategoryId: subCategoryId,
+//       carModelId: carModelId,
+//       carFualTypeId: carFualTypeId,
+//       deliveryCharges: deliveryCharges,
+//       regulerServiceId: regulerServiceId
+//     });
+
+//     if (add != null) {
+//       await add.save();
+//       return res.status(200).json({ IsSuccess: true, Data: [add], Message: 'Added Data' })
+//     } else {
+//       return res.status(200).json({ IsSuccess: true, Data: [], Message: 'Not Added Data' })
+//     }
+//   }
+//   catch (error) {
+//     return res.status(500).json({ IsSuccess: false, Data: 0, Message: error.message })
+//   }
+
+// });
 
 router.post('/updateService_v5', async function (req, res) {
   try {
@@ -1014,6 +1040,8 @@ router.post('/updateService_v5', async function (req, res) {
       regulerServiceId,
       deliveryCharges } = req.body
 
+
+
     let imagePath = [];
     if (image != undefined && image != null && image != [] && image != "") {
       if (image.length > 0) {
@@ -1028,36 +1056,67 @@ router.post('/updateService_v5', async function (req, res) {
     }
     img = imagePath.pop()
 
+    if (serviceId != null || serviceId != undefined) {
 
-    const update = await serviceSchema2.aggregate([{
-      $match: {
-        _id: mongoose.Types.ObjectId(serviceId)
+      const update = await serviceSchema2.aggregate([{
+        $match: {
+          _id: mongoose.Types.ObjectId(serviceId)
+        }
       }
-    }
-    ]);
+      ]);
 
-    if (update.length == 1) {
-      let updateIs;
-      updateIs = {
-        title: title != undefined ? title : update[0].title,
-        mrp: mrp != undefined ? mrp : update[0].mrp,
-        currentMrp: currentMrp != undefined ? currentMrp : update[0].currentMrp,
-        discount: discount != undefined ? discount : update[0].discount,
-        service: service != undefined ? service : update[0].service,
-        image: img != undefined ? img : update[0].image,
-        icons: icons != undefined ? icons : update[0].icons,
-        carTypeId: carTypeId != undefined ? carTypeId : update[0].carTypeId,
-        subCategoryId: subCategoryId != undefined ? subCategoryId : update[0].subCategoryId,
-        carModelId: carModelId != undefined ? carModelId : update[0].carModelId,
-        carFualTypeId: carFualTypeId != undefined ? carFualTypeId : update[0].carFualTypeId,
-        deliveryCharges: deliveryCharges != undefined ? deliveryCharges : update[0].deliveryCharges,
-        regulerServiceId: regulerServiceId != undefined ? regulerServiceId : update[0].regulerServiceId,
+      if (update.length == 1) {
+        let updateIs;
+        updateIs = {
+          title: title != undefined ? title : update[0].title,
+          mrp: mrp != undefined ? mrp : update[0].mrp,
+          currentMrp: currentMrp != undefined ? currentMrp : update[0].currentMrp,
+          discount: discount != undefined ? discount : update[0].discount,
+          service: service != undefined ? service : update[0].service,
+          image: img != undefined ? img : update[0].image,
+          icons: icons != undefined ? icons : update[0].icons,
+          carTypeId: carTypeId != undefined ? carTypeId : update[0].carTypeId,
+          subCategoryId: subCategoryId != undefined ? subCategoryId : update[0].subCategoryId,
+          carModelId: carModelId != undefined ? carModelId : update[0].carModelId,
+          carFualTypeId: carFualTypeId != undefined ? carFualTypeId : update[0].carFualTypeId,
+          deliveryCharges: deliveryCharges != undefined ? deliveryCharges : update[0].deliveryCharges,
+          regulerServiceId: regulerServiceId != undefined ? regulerServiceId : update[0].regulerServiceId,
+        }
+        let updateIss = await serviceSchema2.findByIdAndUpdate(serviceId, updateIs, { new: true })
+
+        return res.status(200).json({ IsSuccess: true, Data: [updateIss], Message: `Updated Data` });
+      } else {
+        return res.status(200).json({ IsSuccess: true, Data: [], Message: 'Not Found' })
       }
-      let updateIss = await serviceSchema2.findByIdAndUpdate(serviceId, updateIs, { new: true })
-
-      return res.status(200).json({ IsSuccess: true, Data: [updateIss], Message: `Updated Data` });
     } else {
-      return res.status(200).json({ IsSuccess: true, Data: [], Message: 'Not Found' })
+      const update = await serviceSchema2.aggregate([{
+        $match: {
+          $and: [{
+            subCategoryId: mongoose.Types.ObjectId(subCategoryId),
+            regulerServiceId: mongoose.Types.ObjectId(regulerServiceId)
+          }]
+        }
+      }
+      ]);
+
+      if (update.length > 0) {
+        let updateIs;
+        updateIs = {
+          mrp: mrp != undefined ? mrp : update[0].mrp,
+          currentMrp: currentMrp != undefined ? currentMrp : update[0].currentMrp,
+          discount: discount != undefined ? discount : update[0].discount,
+        }
+        let updateIss = await serviceSchema2.updateMany({
+          $and: [{
+            subCategoryId: mongoose.Types.ObjectId(subCategoryId),
+            regulerServiceId: mongoose.Types.ObjectId(regulerServiceId)
+          }]
+        }, { $set: updateIs }, { new: true })
+
+        return res.status(200).json({ IsSuccess: true, Data: [updateIss], Message: `Updated Data` });
+      } else {
+        return res.status(200).json({ IsSuccess: true, Data: [], Message: 'Not Found' })
+      }
     }
   } catch (error) {
     return res.status(500).json({ IsSuccess: false, Message: error.message })
@@ -1121,18 +1180,41 @@ router.post('/getAllService_v5', async function (req, res) {
 router.post("/deleteService_v5", async function (req, res, next) {
   try {
     const { serviceId } = req.body;
-    let deletes = await serviceSchema2.aggregate([
-      {
+
+    if (serviceId != null || serviceId != undefined) {
+      let deletes = await serviceSchema2.aggregate([
+        {
+          $match: {
+            _id: mongoose.Types.ObjectId(serviceId)
+          }
+        }
+      ]);
+      if (deletes.length == 1) {
+        let deletee = await serviceSchema2.findByIdAndDelete(serviceId);
+        return res.status(200).json({ IsSuccess: true, Data: [deletee], Message: 'Delete data' });
+      } else {
+        return res.status(200).json({ IsSuccess: true, Data: [], Message: "No Found" });
+      }
+    } else {
+      const { subCategoryId, regulerServiceId } = req.body;
+      const deletes = await serviceSchema2.aggregate([{
         $match: {
-          _id: mongoose.Types.ObjectId(serviceId)
+          $and: [{
+            subCategoryId: mongoose.Types.ObjectId(subCategoryId),
+            regulerServiceId: mongoose.Types.ObjectId(regulerServiceId)
+          }]
         }
       }
-    ]);
-    if (deletes.length == 1) {
-      let deletee = await serviceSchema2.findByIdAndDelete(serviceId);
-      return res.status(200).json({ IsSuccess: true, Data: [deletee], Message: 'Delete data' });
-    } else {
-      return res.status(200).json({ IsSuccess: true, Data: [], Message: "No Found" });
+      ]);
+      if (deletes.length > 0) {
+        let deletee = await serviceSchema2.deleteMany({
+          subCategoryId: mongoose.Types.ObjectId(subCategoryId),
+          regulerServiceId: mongoose.Types.ObjectId(regulerServiceId)
+        });
+        return res.status(200).json({ IsSuccess: true, Data: [deletee], Message: 'Delete data' });
+      } else {
+        return res.status(200).json({ IsSuccess: true, Data: [], Message: "No Found" });
+      }
     }
   } catch (error) {
     return res.status(500).json({ IsSuccess: false, Message: error.message });
@@ -1329,14 +1411,14 @@ router.post('/updateRegulerService_v1', async function (req, res) {
         _id: mongoose.Types.ObjectId(regulerServiceId)
       }
     }
-    // {
-    //   $lookup: {
-    //     from: "servicedata2",
-    //     localField: "_id",
-    //     foreignField: "regulerServiceId",
-    //     as: "serviceData"
-    //   }
-    // }
+      // {
+      //   $lookup: {
+      //     from: "servicedata2",
+      //     localField: "_id",
+      //     foreignField: "regulerServiceId",
+      //     as: "serviceData"
+      //   }
+      // }
     ]);
     // console.log(update[0].serviceData.length);
     // service image 
@@ -1388,7 +1470,7 @@ router.post('/updateRegulerService_v1', async function (req, res) {
         //   let updateIsss = await serviceSchema2.findByIdAndUpdate(service._id, updateIs)
         // }
 
-        let updateIsss = await serviceSchema2.updateMany({regulerServiceId:regulerServiceId}, {$set:updateIs})
+        let updateIsss = await serviceSchema2.updateMany({ regulerServiceId: regulerServiceId }, { $set: updateIs })
         console.log(updateIsss, "updataed")
       }
       return res.status(200).json({ IsSuccess: true, Data: [updateIss], Message: `Updated Data` });
@@ -1696,7 +1778,7 @@ router.post('/addNewCarModel', async function (req, res) {
     if (authToken != config.tockenIs || authToken == null || authToken == undefined) {
       return res.status(200).json({ IsSuccess: false, Data: [], Message: "You are not authenticated" });
     }
-    
+
 
     // service image 
     let imagePath = [];
@@ -1725,10 +1807,10 @@ router.post('/addNewCarModel', async function (req, res) {
 
 
     // added by jayshri for fuledetails
-    
+
     if (add != null) {
       await add.save()
-  
+
       let addFuel = await new carModelFuelSchema({
         carModelId: add._id,
         fuelTypeId: fuelTypeId,
@@ -1851,7 +1933,7 @@ router.post('/getCarModelByCarBrandId', async function (req, res) {
 
 router.post('/UpdateCarModel', async function (req, res) {
   try {
-    const { carBrandId, modelName, carTypeId, image, carModelId, isActive, carModelFuelId , fuelTypeId} = req.body
+    const { carBrandId, modelName, carTypeId, image, carModelId, isActive, carModelFuelId, fuelTypeId } = req.body
 
     const update = await carModelSchema.aggregate([{
       $match: {
@@ -1882,7 +1964,7 @@ router.post('/UpdateCarModel', async function (req, res) {
         image: img != undefined ? img : update[0].image,
         carTypeId: carTypeId != undefined ? carTypeId : update[0].carTypeId,
         isActive: isActive != undefined ? isActive : update[0].isActive, // added by jayshri 23 feb 2023
-      
+
       }
       let updateIss = await carModelSchema.findByIdAndUpdate(carModelId, updateIs, { new: true })
 
@@ -1894,7 +1976,7 @@ router.post('/UpdateCarModel', async function (req, res) {
         }
       }
       ]);
-      
+
       let updateIss1
       if (update1.length == 1) {
         let updateIs1;
@@ -1903,7 +1985,7 @@ router.post('/UpdateCarModel', async function (req, res) {
           carModelId: carModelId != undefined ? carModelId : update1[0].carModelId,
           image: image != undefined ? img : update1[0].image,
         }
-         updateIss1 = await carModelFuelSchema.findByIdAndUpdate(carModelFuelId, updateIs1, { new: true })
+        updateIss1 = await carModelFuelSchema.findByIdAndUpdate(carModelFuelId, updateIs1, { new: true })
       }
       // end
 
@@ -4208,7 +4290,7 @@ router.post('/getServiceWithSubCategoryId', async function (req, res) {
 // ---------------------------------- Paras ------------------------------------
 router.post('/getSubCategoryByCarmodelId_v5', async function (req, res) {
   try {
-    const { categoryId, carModelId, fuelTypeId } = req.body
+    // const { categoryId, carModelId, fuelTypeId } = req.body
 
     let authToken = req.headers['authorization'];
 
@@ -4216,30 +4298,56 @@ router.post('/getSubCategoryByCarmodelId_v5', async function (req, res) {
       return res.status(200).json({ IsSuccess: false, Data: [], Message: "You are not authenticated" });
     }
 
-    const get = await serviceSchema2.aggregate([{
-      $match: {
-        $and: [
-          {
-            subCategoryId: mongoose.Types.ObjectId(categoryId)
-          },
-          {
-            carModelId: mongoose.Types.ObjectId(carModelId)
-          },
-          {
-            carFualTypeId: mongoose.Types.ObjectId(fuelTypeId)
-          },
-        ]
+    let stringObjectIdArray = req.body.carModelId
+    let carModelIdObjectIdArray = stringObjectIdArray.map(mongoose.Types.ObjectId);
+
+    let stringObjectIdArray2 = req.body.fuelTypeId
+    let fuelTypeIdObjectIdArray = stringObjectIdArray2.map(mongoose.Types.ObjectId);
+
+
+    // const get = await serviceSchema2.aggregate([{
+    //   $match: {
+    //     $and: [
+    //       {
+    //         subCategoryId: mongoose.Types.ObjectId(categoryId)
+    //       },
+    //       {
+    //         carModelId: mongoose.Types.ObjectId(carModelId)
+    //       },
+    //       {
+    //         carFualTypeId: mongoose.Types.ObjectId(fuelTypeId)
+    //       },
+    //     ]
+    //   }
+    // },
+    //   // {
+    //   //   $project: {
+    //   //     "title": 1,
+    //   //     "icon": 1,
+    //   //     "mrp": 1,
+    //   //     "currentMrp": 1,
+    //   //     "discount": 1
+    //   //   }
+    //   // }
+    // ]);
+
+
+    const get = await serviceSchema2.aggregate([
+      {
+        '$match': {
+          '$and': [
+            {
+              'carModelId': {
+                '$in': carModelIdObjectIdArray
+              },
+              'carFualTypeId': {
+                '$in': fuelTypeIdObjectIdArray
+              },
+              'subCategoryId': mongoose.Types.ObjectId(req.body.categoryId)
+            }
+          ]
+        }
       }
-    },
-      // {
-      //   $project: {
-      //     "title": 1,
-      //     "icon": 1,
-      //     "mrp": 1,
-      //     "currentMrp": 1,
-      //     "discount": 1
-      //   }
-      // }
     ]);
 
     if (get.length > 0) {
@@ -4247,7 +4355,6 @@ router.post('/getSubCategoryByCarmodelId_v5', async function (req, res) {
     } else {
       return res.status(200).json({ IsSuccess: true, Data: [], Message: "No Data Found" })
     }
-
 
   } catch (error) {
     return res.status(500).json({ IsSuccess: false, Message: error.message })

@@ -8,9 +8,10 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var adminRouter = require('./routes/admin');
 var venderRouter = require('./routes/vender');
+
 // const { isatty } = require('tty');
 
-const events = require('events');
+// const events = require('events');
 var app = express();
 
 // view engine setup
@@ -48,22 +49,33 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
+async function addService(req, res, next) {
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive'
+  })
+  const NewServiceRequest = req.body;
+  service.push(NewServiceRequest);
+  respsonse.json(NewServiceRequest)
+  // return sendEventsToAll(NewServiceRequest);
+}
 
-const myEmitter = new events.EventEmitter();
+app.post('/newServiceRequest', addService);
 
-// new service ressquest event
- myEmitter.on('NewServiceRequested',(data) =>{   
- console.log('NewServiceRequested: ' + data);
- });
+// app.get('/',(req,res)=>{
+//   res.send("hello world")
+//   console.log("hiiii")
+// })
 
- // Raising NewServiceRequested event
-myEmitter.emit('NewServiceRequested', 'This is my first Node.js event emitter example.');
 
 app.listen(process.env.PORT, () => {
   console.log("listening");
 });
 
 module.exports = app;
+
+
 
 
 

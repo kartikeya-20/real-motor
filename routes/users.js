@@ -8836,8 +8836,12 @@ router.post("/addNewBooking_v5", async function (req, res) {
                 ) {
                   console.log("3");
                   console.log(memberShipServices[0].service[i].qty);
+                  console.log(memberShipServices[0].service[i].discount);
 
-                  if (memberShipServices[0].service[i].qty > 0) {
+
+                  // added 
+
+                  if (parseInt(memberShipServices[0].service[i].qty) > 0) {
                     data = parseInt(memberShipServices[0].service[i].qty) - 1;
 
                     const update = await userMemberShipSchema.aggregate([
@@ -8864,7 +8868,42 @@ router.post("/addNewBooking_v5", async function (req, res) {
                       // let updatePrice=await userMemberShipSchema.findByIdAndUpdate(userMemberId,allPriceIs,{new:true});
                     }
                     // return res.status(200).json({ IsSuccess: true, Data:[], Message: 'This type All Service are use' })
-                  } else {
+                  } else if (parseInt(memberShipServices[0].service[i].discount) > 0){
+
+                    const update = await userMemberShipSchema.aggregate([
+                      {
+                        $match: {
+                          userId: mongoose.Types.ObjectId(userId),
+                        },
+                      },
+                    ]);
+
+                    if (update.length > 0) {
+                      let today = new Date()
+                      let membershipExpireDate = new Date(update.exDateTime)
+                      if (today <= membershipExpireDate){
+                        console.log("geting discount")
+                      }else{
+                      data = 0
+                      let updatePrice =
+                        await userMemberShipSchema.findOneAndUpdate(
+                          {
+                            userId: mongoose.Types.ObjectId(userId),
+                            "service.serviceId": mongoose.Types.ObjectId(
+                              memberShipServices[0].service[i].serviceId
+                            ),
+                          },
+                          { $set: { "service.$.discount": data } },
+                          { new: true }
+                        );
+                      console.log(updatePrice);
+                        }
+                      // let updatePrice=await userMemberShipSchema.findByIdAndUpdate(userMemberId,allPriceIs,{new:true});
+                    }
+                    // return res.status(200).json({ IsSuccess: true, Data:[], Message: 'This type All Service are use' })
+                  
+
+                  }else {
                     console.log("This type All Service are use");
                   }
 
