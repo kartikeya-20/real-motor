@@ -49,6 +49,51 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
+
+
+// ...
+
+app.get('/status', (request, response) => response.json({clients: clients.length}));
+
+let clients = [];
+let service = [];
+
+function eventsHandler(request, response, next) {
+  const headers = {
+    'Content-Type': 'text/event-stream',
+    'Connection': 'keep-alive',
+    'Cache-Control': 'no-cache'
+  };
+  response.writeHead(200, headers);
+
+  const data = `data: ${JSON.stringify(facts)}\n\n`;
+
+  response.write(data);
+
+  const clientId = Date.now();
+
+  const newClient = {
+    id: clientId,
+    response
+  };
+
+  clients.push(newClient);
+
+  request.on('close', () => {
+    console.log(`${clientId} Connection closed`);
+    clients = clients.filter(client => client.id !== clientId);
+  });
+}
+
+app.get('/events', eventsHandler);
+
+
+// ...
+
+function sendEventsToAll(newFact) {
+  clients.forEach(client => client.res.write(`data: ${JSON.stringify(newFact)}\n\n`))
+}
+
 async function addService(req, res, next) {
   res.writeHead(200, {
     'Content-Type': 'text/event-stream',
@@ -58,15 +103,10 @@ async function addService(req, res, next) {
   const NewServiceRequest = req.body;
   service.push(NewServiceRequest);
   respsonse.json(NewServiceRequest)
-  // return sendEventsToAll(NewServiceRequest);
+  return sendEventsToAll(NewServiceRequest);
 }
 
 app.post('/newServiceRequest', addService);
-
-// app.get('/',(req,res)=>{
-//   res.send("hello world")
-//   console.log("hiiii")
-// })
 
 
 app.listen(process.env.PORT, () => {

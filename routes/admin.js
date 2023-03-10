@@ -1829,6 +1829,23 @@ router.post('/addNewCarModel', async function (req, res) {
 
 });
 
+router.post('/addIsActiveTrue', async function (req, res) {
+  try {
+
+    let updateData = await carModelSchema.updateMany({isActive:null}, {
+      $set: {
+        isActive: true
+      }
+    })
+    return res.status(200).json({ IsSuccess: true, Data: updateData, Message: 'Added Data' })
+
+  }
+  catch (error) {
+    return res.status(500).json({ IsSuccess: false, Data: 0, Message: error.message })
+  }
+
+});
+
 router.post('/getAllCarModel', async function (req, res) {
   try {
 
