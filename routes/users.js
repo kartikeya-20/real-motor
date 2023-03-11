@@ -6294,6 +6294,7 @@ router.post("/getAddToCart_v5", async function (req, res) {
           for (let i = 0; i < get.length; i++) {
             console.log(get);
             console.log("1");
+            console.log(get[i].serviceId.toString())
             for (let j = 0; j < get[0].serviceDetails.length; j++) {
               console.log("2");
               const found = checkMemberShip[0].service.find(
@@ -7609,6 +7610,8 @@ router.post("/addNewUserMemberShip", async function (req, res) {
       razorePayOrderId,
       razorePayPaymentId,
       amount,
+      carId,
+      carNumber
     } = req.body;
 
     let authToken = req.headers["authorization"];
@@ -7677,6 +7680,8 @@ router.post("/addNewUserMemberShip", async function (req, res) {
       razorePayOrderId: razorePayOrderId,
       razorePayPaymentId: razorePayPaymentId,
       amount: amount,
+      carId: carId , // added jayshri 11 march 2023
+      carNumber : carNumber
     });
 
     if (add != null) {
@@ -10656,6 +10661,7 @@ router.post("/getUserAllCar", async function (req, res) {
           image: 1,
           "carModelDetails.modelName": 1,
           "carFuelDetails.fuelType": 1,
+          "carModelDetails.isActive": 1,
           status: 1,
         },
       },

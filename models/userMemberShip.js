@@ -38,7 +38,15 @@ const userMemberShip = mongoose.Schema({
                 type: String
             }
         }
-    ]
+    ],
+    // added for attached membership with one car
+    carId: {
+        type: mongoose.Types.ObjectId,
+        ref:"carModel"
+    },
+    carNumber:{
+        type: String
+    },
 
 });
 
