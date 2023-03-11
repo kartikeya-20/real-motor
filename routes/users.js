@@ -10728,7 +10728,7 @@ router.post("/getUserSelectedCar", async function (req, res) {
           image: 1,
           "carModelDetails.modelName": 1,
           "carFuelDetails.fuelType": 1,
-          "carFuelDetails.isActive": 1,
+          "carModelDetails.isActive": 1,
           status: 1,
         },
       },
