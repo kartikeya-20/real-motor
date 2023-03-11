@@ -2337,7 +2337,7 @@ router.post('/getCarBrand', async function (req, res) {
 
 router.post('/UpdateCarBrand', async function (req, res) {
   try {
-    const { image, brandName, carBrandId } = req.body
+    const { image, brandName, carBrandId, isActive } = req.body
 
     const update = await carBrandSchema.aggregate([{
       $match: {
@@ -2364,7 +2364,8 @@ router.post('/UpdateCarBrand', async function (req, res) {
       let updateIs;
       updateIs = {
         image: img != undefined ? img : update[0].image,
-        brandName: brandName != undefined ? brandName : update[0].brandName
+        brandName: brandName != undefined ? brandName : update[0].brandName,
+        isActive: isActive != undefined ? isActive : update[0].isActive
       }
       let updateIss = await carBrandSchema.findByIdAndUpdate(carBrandId, updateIs, { new: true })
       return res.status(200).json({ IsSuccess: true, Data: [updateIss], Message: `Updated Data` });
