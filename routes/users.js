@@ -10730,6 +10730,7 @@ router.post("/getUserSelectedCar", async function (req, res) {
           "carModelDetails.isActive": 1,
           "carFuelDetails.fuelType": 1,
           status: 1,
+          "carModelDetails.isActive": 1
         },
       },
     ]);

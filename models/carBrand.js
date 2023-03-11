@@ -6,6 +6,10 @@ const brand = mongoose.Schema({
   },
   brandName: {
     type: String
+  },
+  isActive: {
+    type: Boolean,
+    default: true
   }
 });
 
