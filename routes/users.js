@@ -10726,11 +10726,11 @@ router.post("/getUserSelectedCar", async function (req, res) {
       {
         $project: {
           image: 1,
-          "carModelDetails.modelName": 1,
-          "carModelDetails.isActive": 1,
+          // "carModelDetails.modelName": 1,
+          // "carModelDetails.isActive": 1,
           "carFuelDetails.fuelType": 1,
           status: 1,
-          "carModelDetails.isActive": 1
+          "carModelDetails":1
         },
       },
     ]);
