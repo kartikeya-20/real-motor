@@ -5962,6 +5962,7 @@ router.post("/getAddToCart_v5", async function (req, res) {
               couponCode: "",
               Data: gets,
               Message: " Data Found",
+              carNumber : checkMemberShip[0].carNumber
             });
           } else {
             return res.status(200).json({
@@ -5979,6 +5980,7 @@ router.post("/getAddToCart_v5", async function (req, res) {
               couponCode: "",
               Data: [],
               Message: "No Data Found",
+              carNumber : checkMemberShip[0].carNumber
             });
           }
         } else if (status == 2) {
@@ -6240,6 +6242,7 @@ router.post("/getAddToCart_v5", async function (req, res) {
               couponCode: discountCoupon,
               Data: gets,
               Message: " Data Found",
+              carNumber : checkMemberShip[0].carNumber
             });
           } else {
             return res.status(200).json({
@@ -6257,6 +6260,7 @@ router.post("/getAddToCart_v5", async function (req, res) {
               discountAmount: discountAmount.toString(),
               Data: [],
               Message: "No Data Found",
+              carNumber : checkMemberShip[0].carNumber
             });
           }
         } else {
@@ -6500,6 +6504,7 @@ router.post("/getAddToCart_v5", async function (req, res) {
               couponCode: "",
               Data: gets,
               Message: " Data Found",
+              carNumber : checkMemberShip[0].carNumber
             });
           } else {
             return res.status(200).json({
@@ -6517,6 +6522,7 @@ router.post("/getAddToCart_v5", async function (req, res) {
               discountAmount: discountAmount.toString(),
               Data: [],
               Message: "No Data Found",
+              carNumber : checkMemberShip[0].carNumber
             });
           }
         }
@@ -6673,6 +6679,7 @@ router.post("/getAddToCart_v5", async function (req, res) {
               couponCode: "",
               Data: gets,
               Message: " Data Found",
+              carNumber: ""
             });
           } else {
             return res.status(200).json({
@@ -6690,6 +6697,7 @@ router.post("/getAddToCart_v5", async function (req, res) {
               discountAmount: discountAmount.toString(),
               Data: [],
               Message: "No Data Found",
+              carNumber: ""
             });
           }
         } else if (status == 2) {
@@ -6877,6 +6885,7 @@ router.post("/getAddToCart_v5", async function (req, res) {
               couponCode: discountCoupon,
               Data: gets,
               Message: " Data Found",
+              carNumber: ""
             });
           } else {
             return res.status(200).json({
@@ -6894,6 +6903,7 @@ router.post("/getAddToCart_v5", async function (req, res) {
               discountAmount: discountAmount.toString(),
               Data: [],
               Message: "No Data Found",
+              carNumber: ""
             });
           }
         } else {
@@ -7050,6 +7060,7 @@ router.post("/getAddToCart_v5", async function (req, res) {
               discountAmount: discountAmount.toString(),
               Data: gets,
               Message: " Data Found",
+              carNumber: ""
             });
           } else {
             return res.status(200).json({
@@ -7067,6 +7078,7 @@ router.post("/getAddToCart_v5", async function (req, res) {
               discountAmount: discountAmount.toString(),
               Data: [],
               Message: "No Data Found",
+              carNumber: ""
             });
           }
         }
