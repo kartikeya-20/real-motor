@@ -5745,14 +5745,14 @@ router.post("/getAddToCart_v5", async function (req, res) {
               const found = checkMemberShip[0].service.find(
                 (element) =>
                   // element.serviceId.toString() == get[i].serviceId.toString()
-                  element.serviceId.toString() == get[i].serviceDetails[j].regulerServiceId.toString()
+                  element.serviceId.toString() == get[i].serviceDetails[j].regulerServiceId.toString() // added by jayshri
               );
               //console.log(element.serviceId)
               console.log("notttttttt");
               console.log(found);
               if (found != undefined || found != null) {
                 console.log(found, "founddetails");
-                if ((parseInt(found.qty) > 0) || (parseInt(found.discount) > 0)) {
+                if ((parseInt(found.qty) > 0) || (parseInt(found.discount) > 0)) { // added 
                   existIds.push(get[i].serviceDetails[j]._id);
                   d = get[i].serviceDetails[j].currentMrp;
                   var currentMrps = d;
@@ -6064,7 +6064,7 @@ router.post("/getAddToCart_v5", async function (req, res) {
               const found = checkMemberShip[0].service.find(
                 (element) =>
                   // element.serviceId.toString() == get[i].serviceId.toString()
-                  element.serviceId.toString() == get[i].serviceDetails[j].regulerServiceId.toString()
+                  element.serviceId.toString() == get[i].serviceDetails[j].regulerServiceId.toString() // added 
               );
               console.log(found);
               if (found != undefined || found != null) {
