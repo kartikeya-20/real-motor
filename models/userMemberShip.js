@@ -30,6 +30,7 @@ const userMemberShip = mongoose.Schema({
             serviceId: {
                 type: mongoose.Types.ObjectId,
                 // ref: "membershipservice"
+                
                 ref : "RegulerServices"
             },
             qty: {
