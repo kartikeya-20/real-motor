@@ -1783,8 +1783,8 @@ router.post("/signup", async function (req, res) {
           console.log("0 0 ");
           total =
             parseInt(parseInt(user[0].refferalPoint)) + parseInt(setting[0].userCode);
-          console.log("1 total: " , total);
-          console.log("1 totla string: " , total.toString());
+          console.log("1 total: ", total);
+          console.log("1 totla string: ", total.toString());
           let updateIs;
           updateIs = {
             refferalPoint: total.toString(),
@@ -1797,7 +1797,7 @@ router.post("/signup", async function (req, res) {
             updateIs,
           );
 
-          console.log("0-0 updateIss Data : " , updateIss);
+          console.log("0-0 updateIss Data : ", updateIss);
           //res.status(200).json({ IsSuccess: true, Data: updateIss, Message: `Updated Data` });
 
           const add = await new referralAndEarnSchema({
@@ -1820,27 +1820,27 @@ router.post("/signup", async function (req, res) {
                 },
               },
             ]);
-            console.log("get :" , gets );
-            console.log("setting :" , setting );
-            console.log("get 0 index refferalpoint :" ,gets[0].refferalPoint);
-            console.log("get 0 index refferalpoint :" ,setting[0].userCode);
+            console.log("get :", gets);
+            console.log("setting :", setting);
+            console.log("get 0 index refferalpoint :", gets[0].refferalPoint);
+            console.log("get 0 index refferalpoint :", setting[0].userCode);
             total =
               parseInt(gets[0].refferalPoint) + parseInt(setting[0].referralCode);
-            console.log("Check total : " , total);
-            console.log("Check total : " , total.toString());
+            console.log("Check total : ", total);
+            console.log("Check total : ", total.toString());
             let updateIs;
             updateIs = {
               refferalPoint: total.toString(),
             };
 
-            console.log("updateIs check :" , updateIs);
+            console.log("updateIs check :", updateIs);
             let updateIss = await userDetailsSchema.findByIdAndUpdate(
               gets[0]._id,
               updateIs,
-              {new:true}
+              { new: true }
             );
 
-            console.log("0-0 Done" , updateIss);
+            console.log("0-0 Done", updateIss);
             if (adds != null) {
               await adds.save();
               console.log(adds);
@@ -4249,17 +4249,17 @@ router.post("/getAddToCart", async function (req, res) {
 
     let authToken = req.headers["authorization"];
 
-    if (
-      authToken != config.tockenIs ||
-      authToken == null ||
-      authToken == undefined
-    ) {
-      return res.status(200).json({
-        IsSuccess: false,
-        Data: [],
-        Message: "You are not authenticated",
-      });
-    }
+    // if (
+    //   authToken != config.tockenIs ||
+    //   authToken == null ||
+    //   authToken == undefined
+    // ) {
+    //   return res.status(200).json({
+    //     IsSuccess: false,
+    //     Data: [],
+    //     Message: "You are not authenticated",
+    //   });
+    // }
 
     const getMember = await userDetailsSchema.aggregate([
       {
@@ -5740,25 +5740,36 @@ router.post("/getAddToCart_v5", async function (req, res) {
             console.log(get);
             console.log("jjjjjjjjjj");
             for (let j = 0; j < get[0].serviceDetails.length; j++) {
-              //   console.log("data" + get[0].serviceDetails[j])
+              // console.log("data" + get[0].serviceDetails[j])
               //console.log(checkMemberShip[0].service)
               const found = checkMemberShip[0].service.find(
                 (element) =>
-                  element.serviceId.toString() == get[i].serviceId.toString()
+                  // element.serviceId.toString() == get[i].serviceId.toString()
+                  element.serviceId.toString() == get[i].serviceDetails[j].regulerServiceId.toString()
               );
               //console.log(element.serviceId)
               console.log("notttttttt");
               console.log(found);
               if (found != undefined || found != null) {
-                console.log(found);
-                existIds.push(get[i].serviceDetails[j]._id);
-                d = get[i].serviceDetails[j].currentMrp;
-                var currentMrps = d;
-                console.log("0 total");
-                currentMrp += 0;
-                console.log(currentMrp + "  currentMrp");
-                mrp += 0;
-                delivery += parseInt(get[i].serviceDetails[j].deliveryCharges);
+                console.log(found, "founddetails");
+                if ((parseInt(found.qty) > 0) || (parseInt(found.discount) > 0)) {
+                  existIds.push(get[i].serviceDetails[j]._id);
+                  d = get[i].serviceDetails[j].currentMrp;
+                  var currentMrps = d;
+                  console.log("0 total");
+                  currentMrp += 0;
+                  console.log(currentMrp + "  currentMrp");
+                  mrp += 0;
+                  delivery += parseInt(get[i].serviceDetails[j].deliveryCharges);
+                } else {
+                  console.log("1 total");
+                  // existIds.push(get[j].serviceId)
+                  currentMrp += parseInt(get[i].serviceDetails[j].currentMrp);
+                  //  console.log(currentMrp)
+                  mrp += parseInt(get[i].serviceDetails[j].mrp);
+                  delivery += parseInt(get[i].serviceDetails[j].deliveryCharges);
+                }
+
               } else {
                 console.log("1 total");
                 // existIds.push(get[j].serviceId)
@@ -6052,14 +6063,22 @@ router.post("/getAddToCart_v5", async function (req, res) {
             for (let j = 0; j < get[0].serviceDetails.length; j++) {
               const found = checkMemberShip[0].service.find(
                 (element) =>
-                  element.serviceId.toString() == get[i].serviceId.toString()
+                  // element.serviceId.toString() == get[i].serviceId.toString()
+                  element.serviceId.toString() == get[i].serviceDetails[j].regulerServiceId.toString()
               );
               console.log(found);
               if (found != undefined || found != null) {
-                existIds.push(get[i].serviceDetails[j]._id);
-                currentMrp += 0;
-                mrp += 0;
-                delivery += parseInt(get[i].serviceDetails[j].deliveryCharges);
+                if ((parseInt(found.qty) > 0) || (parseInt(found.discount) > 0)) {
+                  existIds.push(get[i].serviceDetails[j]._id);
+                  currentMrp += 0;
+                  mrp += 0;
+                  delivery += parseInt(get[i].serviceDetails[j].deliveryCharges);
+                } else {
+                  currentMrp += parseInt(get[i].serviceDetails[j].currentMrp);
+                  mrp += parseInt(get[i].serviceDetails[j].mrp);
+                  delivery += parseInt(get[i].serviceDetails[j].deliveryCharges);
+                }
+
               } else {
                 currentMrp += parseInt(get[i].serviceDetails[j].currentMrp);
                 mrp += parseInt(get[i].serviceDetails[j].mrp);
@@ -6299,15 +6318,23 @@ router.post("/getAddToCart_v5", async function (req, res) {
               console.log("2");
               const found = checkMemberShip[0].service.find(
                 (element) =>
-                  element.serviceId.toString() == get[i].serviceId.toString()
+                  // element.serviceId.toString() == get[i].serviceId.toString()
+                  element.serviceId.toString() == get[i].serviceDetails[j].regulerServiceId.toString() // added by jayshri
               );
               console.log("3");
               console.log(found);
               if (found != undefined || found != null) {
-                existIds.push(get[i].serviceDetails[j]._id);
-                currentMrp += 0;
-                mrp += 0;
-                delivery += parseInt(get[i].serviceDetails[j].deliveryCharges);
+                if ((parseInt(found.qty) > 0) || (parseInt(found.discount) > 0)){// added by jayshri to check if membership service is available or not
+                  existIds.push(get[i].serviceDetails[j]._id);
+                  currentMrp += 0;
+                  mrp += 0;
+                  delivery += parseInt(get[i].serviceDetails[j].deliveryCharges);
+                }else{
+                  currentMrp += parseInt(get[i].serviceDetails[j].currentMrp);
+                  mrp += parseInt(get[i].serviceDetails[j].mrp);
+                  delivery += parseInt(get[i].serviceDetails[j].deliveryCharges);
+                }
+                
               } else {
                 currentMrp += parseInt(get[i].serviceDetails[j].currentMrp);
                 mrp += parseInt(get[i].serviceDetails[j].mrp);
@@ -7035,6 +7062,1446 @@ router.post("/getAddToCart_v5", async function (req, res) {
   }
 });
 
+// router.post("/getAddToCart_v5", async function (req, res) {
+//   try {
+//     const { userId, discountCoupon, refferal, status } = req.body;
+
+//     let authToken = req.headers["authorization"];
+
+//     // if (
+//     //   authToken != config.tockenIs ||
+//     //   authToken == null ||
+//     //   authToken == undefined
+//     // ) {
+//     //   return res.status(200).json({
+//     //     IsSuccess: false,
+//     //     Data: [],
+//     //     Message: "You are not authenticated",
+//     //   });
+//     // }
+
+//     const getMember = await userDetailsSchema.aggregate([
+//       {
+//         $match: {
+//           _id: mongoose.Types.ObjectId(userId),
+//         },
+//       },
+//     ]);
+
+//     const getuserCar = await userCarsSchema.aggregate([
+//       {
+//         $match: {
+//           $and: [
+//             {
+//               userId: mongoose.Types.ObjectId(userId),
+//             },
+//             {
+//               status: 1,
+//             },
+//           ],
+//         },
+//       },
+//     ]);
+
+//     console.log("SelectedCar", getuserCar.length);
+//     console.log("SelectedCar", getMember);
+
+//     //console.log(getMember)
+
+//     if (getuserCar.length == 1) {
+//       if (getMember[0].memberShipStatus == 1) {
+//         console.log("MemberShip parson");
+
+//         //console.log(discountCouponId)
+//         if (status == 1) {
+//           console.log("refferal code");
+//           console.log("1");
+//           const refferalPoint = await userDetailsSchema.aggregate([
+//             {
+//               $match: {
+//                 _id: mongoose.Types.ObjectId(userId),
+//               },
+//             },
+//           ]);
+
+//           const checkMemberShip = await userMemberShip.aggregate([
+//             {
+//               $match: {
+//                 userId: mongoose.Types.ObjectId(userId),
+//               },
+//             },
+//           ]);
+
+//           let attachedCar;
+//           if (checkMemberShip[0].carId.toString() == getuserCar[0].carModelId.toString()) {
+//             attachedCar = true
+//           } else {
+//             attachedCar = false
+//           }
+
+//           //   console.log(checkMemberShip[0].service)
+
+//           console.log("1");
+
+//           const get = await addToCartSchema2.aggregate([
+//             {
+//               $match: {
+//                 $and: [
+//                   {
+//                     userId: mongoose.Types.ObjectId(userId),
+//                   },
+//                   {
+//                     status: 0,
+//                   },
+//                   {
+//                     carModelId: mongoose.Types.ObjectId(getuserCar[0].carModelId),
+//                   },
+//                   {
+//                     fuelTypeId: mongoose.Types.ObjectId(getuserCar[0].fuelTypeId),
+//                   },
+//                 ],
+//               },
+//             },
+//             {
+//               $lookup: {
+//                 from: "userdetails",
+//                 localField: "userId",
+//                 foreignField: "_id",
+//                 as: "userDetails",
+//               },
+//             },
+//             {
+//               $lookup: {
+//                 from: "servicedata2",
+//                 localField: "serviceId",
+//                 foreignField: "_id",
+//                 as: "serviceDetails",
+//               },
+//             },
+//           ]);
+
+//           console.log("Car details ", get);
+//           console.log("addtocart");
+//           currentMrp = 0;
+//           mrp = 0;
+//           discount = 0;
+//           delivery = 0;
+//           let existIds = [];
+//           // for(let k = 0 ; k < checkMemberShip[0].service.length;k++){
+//           for (let i = 0; i < get.length; i++) {
+//             console.log(get);
+//             console.log("jjjjjjjjjj");
+//             for (let j = 0; j < get[0].serviceDetails.length; j++) {
+//               //   console.log("data" + get[0].serviceDetails[j])
+//               //console.log(checkMemberShip[0].service)
+//               const found = checkMemberShip[0].service.find(
+//                 (element) =>
+//                   element.serviceId.toString() == get[i].serviceId.toString()
+//               );
+//               //console.log(element.serviceId)
+//               console.log("notttttttt");
+//               console.log(found);
+//               if ((found != undefined || found != null) && attachedCar == true) {
+//                   console.log(found);
+//                   existIds.push(get[i].serviceDetails[j]._id);
+//                   d = get[i].serviceDetails[j].currentMrp;
+//                   var currentMrps = d;
+//                   console.log("0 total");
+//                   currentMrp += 0;
+//                   console.log(currentMrp + "  currentMrp");
+//                   mrp += 0;
+//                   delivery += parseInt(get[i].serviceDetails[j].deliveryCharges);
+//               } else {
+//                 console.log("1 total");
+//                 // existIds.push(get[j].serviceId)
+//                 currentMrp += parseInt(get[i].serviceDetails[j].currentMrp);
+//                 //  console.log(currentMrp)
+//                 mrp += parseInt(get[i].serviceDetails[j].mrp);
+//                 delivery += parseInt(get[i].serviceDetails[j].deliveryCharges);
+//               }
+
+//               // }
+//             }
+//           }
+//           console.log(existIds);
+//           const pets = [];
+
+//           //console.log(pets.includes());
+
+//           const array1 = get;
+
+//           //   return false
+//           de = "";
+//           if (delivery == 0) {
+//             de = "Free";
+//           } else {
+//             de = delivery;
+//           }
+
+//           const favorite = await favoriteSchema.aggregate([
+//             {
+//               $match: {
+//                 userId: mongoose.Types.ObjectId(userId),
+//               },
+//             },
+//           ]);
+//           arr = [];
+//           // for(let i = 0 ; i < get.length ;i++){
+//           //   for(let j = 0 ; j < favorite.length ;j++){
+//           //  //   console.log(get[i].serviceId.toString() +" == "+ favorite[j].serviceId.toString())
+//           //     if(get[i].serviceId.toString() == favorite[j].serviceId.toString()){
+//           console.log("exist ids");
+//           // console.log(existIds);
+//           const gets = await addToCartSchema2.aggregate([
+//             {
+//               $match: {
+//                 $and: [
+//                   {
+//                     userId: mongoose.Types.ObjectId(userId),
+//                   },
+//                   {
+//                     status: 0,
+//                   },
+//                   {
+//                     carModelId: mongoose.Types.ObjectId(
+//                       getuserCar[0].carModelId
+//                     ),
+//                   },
+//                   {
+//                     fuelTypeId: mongoose.Types.ObjectId(getuserCar[0].fuelTypeId),
+//                   },
+//                 ],
+//               },
+//             },
+//             {
+//               $lookup: {
+//                 from: "servicedata2",
+//                 let: { serviceId: "$serviceId" },
+//                 pipeline: [
+//                   {
+//                     $match: {
+//                       $expr: {
+//                         $eq: ["$_id", "$$serviceId"],
+//                       },
+//                     },
+//                   },
+//                   {
+//                     $set: {
+//                       mrp: {
+//                         $cond: {
+//                           if: { $in: ["$_id", existIds] },
+//                           then: "0",
+//                           else: "$mrp",
+//                         },
+//                       },
+//                       currentMrp: {
+//                         $cond: {
+//                           if: { $in: ["$_id", existIds] },
+//                           then: "0",
+//                           else: "$currentMrp",
+//                         },
+//                       },
+//                       discount: {
+//                         $cond: {
+//                           if: { $in: ["$_id", existIds] },
+//                           then: "0",
+//                           else: "$discount",
+//                         },
+//                       },
+//                     },
+//                   },
+//                 ],
+//                 as: "serviceDetails",
+//               },
+//             },
+
+//             { $unwind: "$serviceDetails" },
+//             {
+//               $project: {
+//                 "serviceDetails.title": 1,
+//                 "serviceDetails.image": 1,
+//                 "serviceDetails.mrp": 1,
+//                 "serviceDetails.currentMrp": 1,
+//                 "serviceDetails.discount": 1,
+//                 "serviceDetails.currentMrp": 1,
+//                 "serviceDetails._id": 1,
+//               },
+//             },
+//           ]);
+//           // console.log(gets)
+//           //console.log(parseInt(mrp)-parseInt(currentMrp))
+//           console.log(currentMrp);
+//           fd = parseInt(mrp) - parseInt(currentMrp);
+//           // console.log(fd)
+//           // console.log("kkk")
+//           if (fd == 0) {
+//             tg = 0;
+//             //   console.log(tg)
+//           } else {
+//             tg = fd / parseInt(mrp);
+//             //  console.log(tg)
+//           }
+
+//           discount = tg * 100;
+
+//           d = parseInt(refferalPoint[0].refferalPoint);
+//           // console.log(d)
+//           if (d == 0) {
+//             s = d;
+//           } else {
+//             s = d / 4;
+//           }
+//           // console.log("kevil")
+//           // console.log(mrp)
+//           //  console.log(currentMrp )
+//           //  console.log("no")
+//           discountAmount = parseInt(mrp) - parseInt(currentMrp);
+//           //console.log(discountAmount)
+//           //console.log(parseInt(s))
+
+//           //console.log(parseInt(discountAmount))
+
+//           // console.log(currentMrp + "total")
+
+//           if (currentMrp == 0) {
+//             totalPay = parseInt(currentMrp) - 0;
+//           } else {
+//             totalPay = parseInt(currentMrp) - parseInt(s);
+//           }
+
+//           //totalPay = parseInt(currentMrp) - parseInt(s)
+
+//           var totalDiscountAmounts = parseInt(s) + parseInt(discountAmount);
+//           console.log("hello");
+//           // console.log(currentMrp)
+//           //  console.log(totalDiscountAmounts + "totalDiscountAmounts")
+//           ////  console.log(totalPay)
+//           //  console.log(discountAmount)
+//           //  console.log(s)
+
+//           if (get.length > 0) {
+//             return res.status(200).json({
+//               IsSuccess: true,
+//               count: gets.length,
+//               totalDiscountAmount: totalDiscountAmounts.toString(),
+//               deliveryCharges: de.toString(),
+//               currentMrp: currentMrp.toString(),
+//               discountAmount: discountAmount.toString(),
+//               mrp: mrp.toString(),
+//               totalPay: totalPay.toString(),
+//               discount: discount.toString(),
+//               refferal: s.toString(),
+//               couponAmaunt: "0",
+//               couponCode: "",
+//               Data: gets,
+//               Message: " Data Found",
+//             });
+//           } else {
+//             return res.status(200).json({
+//               IsSuccess: true,
+//               count: gets.length,
+//               totalDiscountAmount: "0",
+//               deliveryCharges: de.toString(),
+//               currentMrp: currentMrp.toString(),
+//               discountAmount: discountAmount.toString(),
+//               mrp: mrp.toString(),
+//               totalPay: "0",
+//               discount: "0",
+//               refferal: s.toString(),
+//               couponAmaunt: "0",
+//               couponCode: "",
+//               Data: [],
+//               Message: "No Data Found",
+//             });
+//           }
+//         } else if (status == 2) {
+//           console.log("discount code");
+
+//           const coupon = await discountCouponSchema.aggregate([
+//             {
+//               $match: {
+//                 couponCode: discountCoupon,
+//               },
+//             },
+//           ]);
+//           const checkMemberShip = await userMemberShip.aggregate([
+//             {
+//               $match: {
+//                 userId: mongoose.Types.ObjectId(userId),
+//               },
+//             },
+//           ]);
+
+
+//           let attachedCar;
+//           if (checkMemberShip[0].carId.toString() == getuserCar[0].carModelId.toString()) {
+//             attachedCar = true
+//           } else {
+//             attachedCar = false
+//           }
+
+//           console.log(checkMemberShip[0].service);
+//           console.log(coupon);
+
+//           const coupons = await couponUseSchema.aggregate([
+//             {
+//               $match: {
+//                 couponCode: coupon[0].couponCode,
+//               },
+//             },
+//           ]);
+//           console.log(coupons);
+
+//           if (coupons.length > 1) {
+//             return res
+//               .status(200)
+//               .json({ IsSuccess: true, Message: "Coupon Already Use" });
+//           }
+
+//           //console.log(coupon)
+
+//           const get = await addToCartSchema2.aggregate([
+//             {
+//               $match: {
+//                 $and: [
+//                   {
+//                     userId: mongoose.Types.ObjectId(userId),
+//                   },
+//                   {
+//                     status: 0,
+//                   },
+//                   {
+//                     carModelId: mongoose.Types.ObjectId(
+//                       getuserCar[0].carModelId
+//                     ),
+//                   },
+//                   {
+//                     fuelTypeId: mongoose.Types.ObjectId(getuserCar[0].fuelTypeId),
+//                   },
+//                 ],
+//               },
+//             },
+//             {
+//               $lookup: {
+//                 from: "userdetails",
+//                 localField: "userId",
+//                 foreignField: "_id",
+//                 as: "userDetails",
+//               },
+//             },
+//             {
+//               $lookup: {
+//                 from: "servicedata2",
+//                 localField: "serviceId",
+//                 foreignField: "_id",
+//                 as: "serviceDetails",
+//               },
+//             },
+//           ]);
+
+//           currentMrp = 0;
+//           mrp = 0;
+//           discount = 0;
+//           delivery = 0;
+
+//           let existIds = [];
+//           // for(let k = 0 ; k < checkMemberShip[0].service.length;k++){
+//           for (let i = 0; i < get.length; i++) {
+//             console.log(get);
+
+//             for (let j = 0; j < get[0].serviceDetails.length; j++) {
+//               const found = checkMemberShip[0].service.find(
+//                 (element) =>
+//                   element.serviceId.toString() == get[i].serviceId.toString()
+//               );
+//               console.log(found);
+//               if ((found != undefined || found != null) && attachedCar == true) {
+//                 existIds.push(get[i].serviceDetails[j]._id);
+//                 currentMrp += 0;
+//                 mrp += 0;
+//                 delivery += parseInt(get[i].serviceDetails[j].deliveryCharges);
+//               } else {
+//                 currentMrp += parseInt(get[i].serviceDetails[j].currentMrp);
+//                 mrp += parseInt(get[i].serviceDetails[j].mrp);
+//                 delivery += parseInt(get[i].serviceDetails[j].deliveryCharges);
+//               }
+
+//               // }
+//             }
+//           }
+//           de = "";
+//           if (delivery == 0) {
+//             de = "Free";
+//           } else {
+//             de = delivery;
+//           }
+
+//           const favorite = await favoriteSchema.aggregate([
+//             {
+//               $match: {
+//                 userId: mongoose.Types.ObjectId(userId),
+//               },
+//             },
+//           ]);
+//           arr = [];
+//           // for(let i = 0 ; i < get.length ;i++){
+//           //   for(let j = 0 ; j < favorite.length ;j++){
+//           //  //   console.log(get[i].serviceId.toString() +" == "+ favorite[j].serviceId.toString())
+//           //     if(get[i].serviceId.toString() == favorite[j].serviceId.toString()){
+//           console.log("exist ids");
+//           console.log(existIds);
+//           const gets = await addToCartSchema2.aggregate([
+//             {
+//               $match: {
+//                 $and: [
+//                   {
+//                     userId: mongoose.Types.ObjectId(userId),
+//                   },
+//                   {
+//                     status: 0,
+//                   },
+//                   {
+//                     carModelId: mongoose.Types.ObjectId(
+//                       getuserCar[0].carModelId
+//                     ),
+//                   },
+//                   {
+//                     fuelTypeId: mongoose.Types.ObjectId(getuserCar[0].fuelTypeId),
+//                   },
+//                 ],
+//               },
+//             },
+//             {
+//               $lookup: {
+//                 from: "servicedatas",
+//                 let: { serviceId: "$serviceId" },
+//                 pipeline: [
+//                   {
+//                     $match: {
+//                       $expr: {
+//                         $eq: ["$_id", "$$serviceId"],
+//                       },
+//                     },
+//                   },
+//                   {
+//                     $set: {
+//                       mrp: {
+//                         $cond: {
+//                           if: { $in: ["$_id", existIds] },
+//                           then: "0",
+//                           else: "$mrp",
+//                         },
+//                       },
+//                       currentMrp: {
+//                         $cond: {
+//                           if: { $in: ["$_id", existIds] },
+//                           then: "0",
+//                           else: "$currentMrp",
+//                         },
+//                       },
+//                       discount: {
+//                         $cond: {
+//                           if: { $in: ["$_id", existIds] },
+//                           then: "0",
+//                           else: "$discount",
+//                         },
+//                       },
+//                     },
+//                   },
+//                 ],
+//                 as: "serviceDetails",
+//               },
+//             },
+
+//             { $unwind: "$serviceDetails" },
+//             {
+//               $project: {
+//                 "serviceDetails.title": 1,
+//                 "serviceDetails.image": 1,
+//                 "serviceDetails.mrp": 1,
+//                 "serviceDetails.currentMrp": 1,
+//                 "serviceDetails.discount": 1,
+//                 "serviceDetails.currentMrp": 1,
+//                 "serviceDetails._id": 1,
+//               },
+//             },
+//           ]);
+
+//           discount =
+//             ((parseInt(mrp) - parseInt(currentMrp)) / parseInt(mrp)) * 100;
+
+//           discountAmount = parseInt(mrp) - parseInt(currentMrp);
+
+//           totalPay = 0;
+//           if (currentMrp < coupon[0].minimumAmount) {
+//             return res.status(200).json({
+//               IsSuccess: true,
+//               Data: [],
+//               Message: "Minmum Amount " + coupon[0].minimumAmount,
+//             });
+//           } else {
+//             totalPay = parseInt(currentMrp) - parseInt(coupon[0].discount);
+//           }
+
+//           pay = 0;
+
+//           if (totalPay >= 0) {
+//           } else {
+//             totalPay = pay;
+//           }
+
+//           if (get.length > 0) {
+//             return res.status(200).json({
+//               IsSuccess: true,
+//               count: gets.length,
+//               totalDiscountAmount: discountAmount.toString(),
+//               deliveryCharges: de.toString(),
+//               currentMrp: currentMrp.toString(),
+//               mrp: mrp.toString(),
+//               totalPay: totalPay.toString(),
+//               discount: discount.toString(),
+//               discountAmount: discountAmount.toString(),
+//               couponAmaunt: coupon[0].discount,
+//               refferal: "0",
+//               couponCode: discountCoupon,
+//               Data: gets,
+//               Message: " Data Found",
+//             });
+//           } else {
+//             return res.status(200).json({
+//               IsSuccess: true,
+//               count: gets.length,
+//               totalDiscountAmount: "0",
+//               deliveryCharges: de.toString(),
+//               currentMrp: currentMrp.toString(),
+//               mrp: mrp.toString(),
+//               totalPay: currentMrp.toString(),
+//               discount: "0",
+//               refferal: "0",
+//               couponAmaunt: "0",
+//               couponCode: "",
+//               discountAmount: discountAmount.toString(),
+//               Data: [],
+//               Message: "No Data Found",
+//             });
+//           }
+//         } else {
+//           //console.log("refferal code")
+//           const refferalPoint = await userDetailsSchema.aggregate([
+//             {
+//               $match: {
+//                 _id: mongoose.Types.ObjectId(userId),
+//               },
+//             },
+//           ]);
+//           const checkMemberShip = await userMemberShip.aggregate([
+//             {
+//               $match: {
+//                 userId: mongoose.Types.ObjectId(userId),
+//               },
+//             },
+//           ]);
+
+//           console.log(checkMemberShip[0].service);
+
+//           let attachedCar;
+//           if (checkMemberShip[0].carId.toString() == getuserCar[0].carModelId.toString()) {
+//             attachedCar = true
+//           } else {
+//             attachedCar = false
+//           }
+
+//           console.log("0");
+//           const get = await addToCartSchema2.aggregate([
+//             {
+//               $match: {
+//                 $and: [
+//                   {
+//                     userId: mongoose.Types.ObjectId(userId),
+//                   },
+//                   {
+//                     status: 0,
+//                   },
+//                   {
+//                     carModelId: mongoose.Types.ObjectId(
+//                       getuserCar[0].carModelId
+//                     ),
+//                   },
+//                   {
+//                     fuelTypeId: mongoose.Types.ObjectId(getuserCar[0].fuelTypeId),
+//                   },
+//                 ],
+//               },
+//             },
+//             {
+//               $lookup: {
+//                 from: "userdetails",
+//                 localField: "userId",
+//                 foreignField: "_id",
+//                 as: "userDetails",
+//               },
+//             },
+//             {
+//               $lookup: {
+//                 from: "servicedata2",
+//                 localField: "serviceId",
+//                 foreignField: "_id",
+//                 as: "serviceDetails",
+//               },
+//             },
+//           ]);
+
+//           currentMrp = 0;
+//           mrp = 0;
+//           discount = 0;
+//           delivery = 0;
+
+//           let existIds = [];
+//           // for(let k = 0 ; k < checkMemberShip[0].service.length;k++){
+//           for (let i = 0; i < get.length; i++) {
+//             console.log(get);
+//             console.log("1");
+//             console.log(get[i].serviceId.toString())
+//             for (let j = 0; j < get[0].serviceDetails.length; j++) {
+//               console.log("2");
+//               const found = checkMemberShip[0].service.find(
+//                 (element) =>
+//                   element.serviceId.toString() == get[i].serviceId.toString()
+//               );
+//               console.log("3");
+//               console.log(found);
+//               if ((found != undefined || found != null) && attachedCar == true) {
+//                 existIds.push(get[i].serviceDetails[j]._id);
+//                 currentMrp += 0;
+//                 mrp += 0;
+//                 delivery += parseInt(get[i].serviceDetails[j].deliveryCharges);
+//               } else {
+//                 currentMrp += parseInt(get[i].serviceDetails[j].currentMrp);
+//                 mrp += parseInt(get[i].serviceDetails[j].mrp);
+//                 delivery += parseInt(get[i].serviceDetails[j].deliveryCharges);
+//               }
+
+//               // }
+//             }
+//           }
+//           de = "";
+//           if (delivery == 0) {
+//             de = "Free";
+//           } else {
+//             de = delivery;
+//           }
+
+//           const favorite = await favoriteSchema.aggregate([
+//             {
+//               $match: {
+//                 userId: mongoose.Types.ObjectId(userId),
+//               },
+//             },
+//           ]);
+//           arr = [];
+//           // for(let i = 0 ; i < get.length ;i++){
+//           //   for(let j = 0 ; j < favorite.length ;j++){
+//           //  //   console.log(get[i].serviceId.toString() +" == "+ favorite[j].serviceId.toString())
+//           //     if(get[i].serviceId.toString() == favorite[j].serviceId.toString()){
+//           console.log("exist ids");
+//           console.log(existIds);
+//           const gets = await addToCartSchema2.aggregate([
+//             {
+//               $match: {
+//                 $and: [
+//                   {
+//                     userId: mongoose.Types.ObjectId(userId),
+//                   },
+//                   {
+//                     status: 0,
+//                   },
+//                   {
+//                     carModelId: mongoose.Types.ObjectId(
+//                       getuserCar[0].carModelId
+//                     ),
+//                   },
+//                   {
+//                     fuelTypeId: mongoose.Types.ObjectId(getuserCar[0].fuelTypeId),
+//                   },
+//                 ],
+//               },
+//             },
+//             {
+//               $lookup: {
+//                 from: "servicedata2",
+//                 let: { serviceId: "$serviceId" },
+//                 pipeline: [
+//                   {
+//                     $match: {
+//                       $expr: {
+//                         $eq: ["$_id", "$$serviceId"],
+//                       },
+//                     },
+//                   },
+//                   {
+//                     $set: {
+//                       mrp: {
+//                         $cond: {
+//                           if: { $in: ["$_id", existIds] },
+//                           then: "0",
+//                           else: "$mrp",
+//                         },
+//                       },
+//                       currentMrp: {
+//                         $cond: {
+//                           if: { $in: ["$_id", existIds] },
+//                           then: "0",
+//                           else: "$currentMrp",
+//                         },
+//                       },
+//                       discount: {
+//                         $cond: {
+//                           if: { $in: ["$_id", existIds] },
+//                           then: "0",
+//                           else: "$discount",
+//                         },
+//                       },
+//                     },
+//                   },
+//                 ],
+//                 as: "serviceDetails",
+//               },
+//             },
+//             { $unwind: "$serviceDetails" },
+//             {
+//               $project: {
+//                 "serviceDetails.title": 1,
+//                 "serviceDetails.image": 1,
+//                 "serviceDetails.mrp": 1,
+//                 "serviceDetails.currentMrp": 1,
+//                 "serviceDetails.discount": 1,
+//                 "serviceDetails.currentMrp": 1,
+//                 "serviceDetails._id": 1,
+//               },
+//             },
+//           ]);
+//           console.log("4");
+//           //console.log(gets[1].serviceDetails.mrp)
+//           console.log("5");
+//           console.log(mrp, currentMrp);
+
+//           if (parseInt(mrp) == 0 && parseInt(currentMrp) == 0) {
+//             discount = 0;
+//           } else {
+//             discount =
+//               ((parseInt(mrp) - parseInt(currentMrp)) / parseInt(mrp)) * 100;
+//           }
+
+//           console.log(discount);
+//           discountAmount = parseInt(mrp) - parseInt(currentMrp);
+//           point = "100";
+//           console.log("kevil");
+//           // if(parseInt(refferalPoint[0].refferalPoint) >= parseInt(point)){
+//           //   totalPay = parseInt(currentMrp) - parseInt(point)
+//           // }else{
+//           //   totalPay = parseInt(currentMrp) - parseInt(refferalPoint[0].refferalPoint)
+//           // }
+
+//           if (get.length > 0) {
+//             return res.status(200).json({
+//               IsSuccess: true,
+//               count: gets.length,
+//               totalDiscountAmount: discountAmount.toString(),
+//               deliveryCharges: de.toString(),
+//               currentMrp: currentMrp.toString(),
+//               mrp: mrp.toString(),
+//               totalPay: currentMrp.toString(),
+//               discountAmount: discountAmount.toString(),
+//               discount: discount.toString(),
+//               refferal: "0",
+//               couponAmaunt: "0",
+//               couponCode: "",
+//               Data: gets,
+//               Message: " Data Found",
+//             });
+//           } else {
+//             return res.status(200).json({
+//               IsSuccess: true,
+//               count: gets.length,
+//               totalDiscountAmount: "0",
+//               deliveryCharges: de.toString(),
+//               currentMrp: currentMrp.toString(),
+//               mrp: mrp.toString(),
+//               totalPay: currentMrp.toString(),
+//               discount: "0",
+//               refferal: "0",
+//               couponAmaunt: "0",
+//               couponCode: "",
+//               discountAmount: discountAmount.toString(),
+//               Data: [],
+//               Message: "No Data Found",
+//             });
+//           }
+//         }
+//       } else {
+//         console.log(discountCoupon);
+//         if (status == 1) {
+//           console.log("refferal code");
+//           const refferalPoint = await userDetailsSchema.aggregate([
+//             {
+//               $match: {
+//                 _id: mongoose.Types.ObjectId(userId),
+//               },
+//             },
+//           ]);
+
+//           const get = await addToCartSchema2.aggregate([
+//             {
+//               $match: {
+//                 $and: [
+//                   {
+//                     userId: mongoose.Types.ObjectId(userId),
+//                   },
+//                   {
+//                     status: 0,
+//                   },
+//                   {
+//                     carModelId: mongoose.Types.ObjectId(
+//                       getuserCar[0].carModelId
+//                     ),
+//                   },
+//                   {
+//                     fuelTypeId: mongoose.Types.ObjectId(getuserCar[0].fuelTypeId),
+//                   },
+//                 ],
+//               },
+//             },
+//             {
+//               $lookup: {
+//                 from: "userdetails",
+//                 localField: "userId",
+//                 foreignField: "_id",
+//                 as: "userDetails",
+//               },
+//             },
+//             {
+//               $lookup: {
+//                 from: "servicedata2",
+//                 localField: "serviceId",
+//                 foreignField: "_id",
+//                 as: "serviceDetails",
+//               },
+//             },
+//           ]);
+
+//           currentMrp = 0;
+//           mrp = 0;
+//           discount = 0;
+//           delivery = 0;
+
+//           for (let i = 0; i < get.length; i++) {
+//             for (let j = 0; j < get[i].serviceDetails.length; j++) {
+//               //console.log(get[i].serviceDetails[j].currentMrp)
+//               currentMrp += parseInt(get[i].serviceDetails[j].currentMrp);
+//               mrp += parseInt(get[i].serviceDetails[j].mrp);
+//               delivery += parseInt(get[i].serviceDetails[j].deliveryCharges);
+//             }
+//           }
+//           de = "";
+//           if (delivery == 0) {
+//             de = "Free";
+//           } else {
+//             de = delivery;
+//           }
+
+//           const favorite = await favoriteSchema.aggregate([
+//             {
+//               $match: {
+//                 userId: mongoose.Types.ObjectId(userId),
+//               },
+//             },
+//           ]);
+//           arr = [];
+//           // for(let i = 0 ; i < get.length ;i++){
+//           //   for(let j = 0 ; j < favorite.length ;j++){
+//           //  //   console.log(get[i].serviceId.toString() +" == "+ favorite[j].serviceId.toString())
+//           //     if(get[i].serviceId.toString() == favorite[j].serviceId.toString()){
+//           const gets = await addToCartSchema2.aggregate([
+//             {
+//               $match: {
+//                 $and: [
+//                   {
+//                     userId: mongoose.Types.ObjectId(userId),
+//                   },
+//                   {
+//                     status: 0,
+//                   },
+//                   {
+//                     carModelId: mongoose.Types.ObjectId(
+//                       getuserCar[0].carModelId
+//                     ),
+//                   },
+//                   {
+//                     fuelTypeId: mongoose.Types.ObjectId(getuserCar[0].fuelTypeId),
+//                   },
+//                 ],
+//               },
+//             },
+//             {
+//               $lookup: {
+//                 from: "servicedata2",
+//                 localField: "serviceId",
+//                 foreignField: "_id",
+//                 as: "serviceDetails",
+//               },
+//             },
+//             { $unwind: "$serviceDetails" },
+//             {
+//               $project: {
+//                 "serviceDetails.title": 1,
+//                 "serviceDetails.image": 1,
+//                 "serviceDetails.mrp": 1,
+//                 "serviceDetails.currentMrp": 1,
+//                 "serviceDetails.discount": 1,
+//                 "serviceDetails.currentMrp": 1,
+//                 "serviceDetails._id": 1,
+//               },
+//             },
+//           ]);
+
+//           discount =
+//             ((parseInt(mrp) - parseInt(currentMrp)) / parseInt(mrp)) * 100;
+//           discountAmount = parseInt(mrp) - parseInt(currentMrp);
+//           d = parseInt(refferalPoint[0].refferalPoint);
+//           s = d / 4;
+
+//           console.log(parseInt(s));
+
+//           totalPay = parseInt(currentMrp) - parseInt(s);
+//           var totalDiscountAmounts = parseInt(s) + parseInt(discountAmount);
+
+//           if (get.length > 0) {
+//             return res.status(200).json({
+//               IsSuccess: true,
+//               count: gets.length,
+//               totalDiscountAmount: totalDiscountAmounts.toString(),
+//               deliveryCharges: de.toString(),
+//               currentMrp: currentMrp.toString(),
+//               mrp: mrp.toString(),
+//               totalPay: totalPay.toString(),
+//               discount: discount.toString(),
+//               discountAmount: discountAmount.toString(),
+//               refferal: s.toString(),
+//               couponAmaunt: "0",
+//               couponCode: "",
+//               Data: gets,
+//               Message: " Data Found",
+//             });
+//           } else {
+//             return res.status(200).json({
+//               IsSuccess: true,
+//               count: gets.length,
+//               totalDiscountAmount: "0",
+//               deliveryCharges: de.toString(),
+//               currentMrp: currentMrp.toString(),
+//               mrp: mrp.toString(),
+//               totalPay: currentMrp.toString(),
+//               discount: "0",
+//               refferal: "0",
+//               couponAmaunt: "0",
+//               couponCode: "",
+//               discountAmount: discountAmount.toString(),
+//               Data: [],
+//               Message: "No Data Found",
+//             });
+//           }
+//         } else if (status == 2) {
+//           console.log("discount code");
+
+//           const coupon = await discountCouponSchema.aggregate([
+//             {
+//               $match: {
+//                 couponCode: discountCoupon,
+//               },
+//             },
+//           ]);
+//           console.log("1");
+//           console.log(coupon);
+//           const coupons = await couponUseSchema.aggregate([
+//             {
+//               $match: {
+//                 couponCode: coupon[0].couponCode,
+//               },
+//             },
+//           ]);
+//           console.log("1");
+//           if (coupons.length == 1) {
+//             return res
+//               .status(200)
+//               .json({ IsSuccess: true, Message: "Coupon Already Use" });
+//           }
+
+//           console.log("1");
+
+//           console.log(coupon);
+
+//           const get = await addToCartSchema2.aggregate([
+//             {
+//               $match: {
+//                 $and: [
+//                   {
+//                     userId: mongoose.Types.ObjectId(userId),
+//                   },
+//                   {
+//                     status: 0,
+//                   },
+//                   {
+//                     carModelId: mongoose.Types.ObjectId(
+//                       getuserCar[0].carModelId
+//                     ),
+//                   },
+//                   {
+//                     fuelTypeId: mongoose.Types.ObjectId(getuserCar[0].fuelTypeId),
+//                   },
+//                 ],
+//               },
+//             },
+//             {
+//               $lookup: {
+//                 from: "userdetails",
+//                 localField: "userId",
+//                 foreignField: "_id",
+//                 as: "userDetails",
+//               },
+//             },
+//             {
+//               $lookup: {
+//                 from: "servicedata2",
+//                 localField: "serviceId",
+//                 foreignField: "_id",
+//                 as: "serviceDetails",
+//               },
+//             },
+//           ]);
+//           console.log("1");
+//           currentMrp = 0;
+//           mrp = 0;
+//           discount = 0;
+//           delivery = 0;
+
+//           for (let i = 0; i < get.length; i++) {
+//             for (let j = 0; j < get[i].serviceDetails.length; j++) {
+//               console.log(get[i].serviceDetails[j].currentMrp);
+//               currentMrp += parseInt(get[i].serviceDetails[j].currentMrp);
+//               mrp += parseInt(get[i].serviceDetails[j].mrp);
+//               delivery += parseInt(get[i].serviceDetails[j].deliveryCharges);
+//             }
+//           }
+//           de = "";
+//           if (delivery == 0) {
+//             de = "Free";
+//           } else {
+//             de = delivery;
+//           }
+//           console.log("1");
+//           const favorite = await favoriteSchema.aggregate([
+//             {
+//               $match: {
+//                 userId: mongoose.Types.ObjectId(userId),
+//               },
+//             },
+//           ]);
+//           arr = [];
+//           // for(let i = 0 ; i < get.length ;i++){
+//           //   for(let j = 0 ; j < favorite.length ;j++){
+//           //  //   console.log(get[i].serviceId.toString() +" == "+ favorite[j].serviceId.toString())
+//           //     if(get[i].serviceId.toString() == favorite[j].serviceId.toString()){
+//           const gets = await addToCartSchema2.aggregate([
+//             {
+//               $match: {
+//                 $and: [
+//                   {
+//                     userId: mongoose.Types.ObjectId(userId),
+//                   },
+//                   {
+//                     status: 0,
+//                   },
+//                   {
+//                     carModelId: mongoose.Types.ObjectId(
+//                       getuserCar[0].carModelId
+//                     ),
+//                   },
+//                   {
+//                     fuelTypeId: mongoose.Types.ObjectId(getuserCar[0].fuelTypeId),
+//                   },
+//                 ],
+//               },
+//             },
+//             {
+//               $lookup: {
+//                 from: "servicedata2",
+//                 localField: "serviceId",
+//                 foreignField: "_id",
+//                 as: "serviceDetails",
+//               },
+//             },
+//             { $unwind: "$serviceDetails" },
+//             {
+//               $project: {
+//                 "serviceDetails.title": 1,
+//                 "serviceDetails.image": 1,
+//                 "serviceDetails.mrp": 1,
+//                 "serviceDetails.currentMrp": 1,
+//                 "serviceDetails.discount": 1,
+//                 "serviceDetails.currentMrp": 1,
+//                 "serviceDetails._id": 1,
+//               },
+//             },
+//           ]);
+
+//           discount =
+//             ((parseInt(mrp) - parseInt(currentMrp)) / parseInt(mrp)) * 100;
+
+//           discountAmount = parseInt(mrp) - parseInt(currentMrp);
+//           totalPay = 0;
+//           if (currentMrp < coupon[0].minimumAmount) {
+//             return res.status(200).json({
+//               IsSuccess: true,
+//               Data: [],
+//               Message: "Minmum Amount " + coupon[0].minimumAmount,
+//             });
+//           } else {
+//             totalPay = parseInt(currentMrp) - parseInt(coupon[0].discount);
+//           }
+
+//           pay = 0;
+
+//           if (totalPay >= 0) {
+//           } else {
+//             totalPay = pay;
+//           }
+
+//           var totalDiscountAmount =
+//             parseInt(coupon[0].discount) + parseInt(discountAmount);
+
+//           if (get.length > 0) {
+//             return res.status(200).json({
+//               IsSuccess: true,
+//               count: gets.length,
+//               totalDiscountAmount: totalDiscountAmount.toString(),
+//               deliveryCharges: de.toString(),
+//               currentMrp: currentMrp.toString(),
+//               mrp: mrp.toString(),
+//               totalPay: totalPay.toString(),
+//               discountAmount: discountAmount.toString(),
+//               discount: discount.toString(),
+//               couponAmaunt: coupon[0].discount,
+//               refferal: "0",
+//               couponCode: discountCoupon,
+//               Data: gets,
+//               Message: " Data Found",
+//             });
+//           } else {
+//             return res.status(200).json({
+//               IsSuccess: true,
+//               count: gets.length,
+//               totalDiscountAmount: totalDiscountAmount.toString(),
+//               deliveryCharges: de.toString(),
+//               currentMrp: currentMrp.toString(),
+//               mrp: mrp.toString(),
+//               totalPay: currentMrp.toString(),
+//               discount: "0",
+//               refferal: "0",
+//               couponAmaunt: "0",
+//               couponCode: "",
+//               discountAmount: discountAmount.toString(),
+//               Data: [],
+//               Message: "No Data Found",
+//             });
+//           }
+//         } else {
+//           console.log("noo code");
+//           const refferalPoint = await userDetailsSchema.aggregate([
+//             {
+//               $match: {
+//                 _id: mongoose.Types.ObjectId(userId),
+//               },
+//             },
+//           ]);
+
+//           const get = await addToCartSchema2.aggregate([
+//             {
+//               $match: {
+//                 $and: [
+//                   {
+//                     userId: mongoose.Types.ObjectId(userId),
+//                   },
+//                   {
+//                     status: 0,
+//                   },
+//                   {
+//                     carModelId: mongoose.Types.ObjectId(
+//                       getuserCar[0].carModelId
+//                     ),
+//                   },
+//                   {
+//                     fuelTypeId: mongoose.Types.ObjectId(getuserCar[0].fuelTypeId),
+//                   },
+//                 ],
+//               },
+//             },
+//             {
+//               $lookup: {
+//                 from: "userdetails",
+//                 localField: "userId",
+//                 foreignField: "_id",
+//                 as: "userDetails",
+//               },
+//             },
+//             {
+//               $lookup: {
+//                 from: "servicedata2",
+//                 localField: "serviceId",
+//                 foreignField: "_id",
+//                 as: "serviceDetails",
+//               },
+//             },
+//           ]);
+//           console.log(get);
+
+//           currentMrp = 0;
+//           mrp = 0;
+//           discount = 0;
+//           delivery = 0;
+
+//           for (let i = 0; i < get.length; i++) {
+//             console.log(i);
+//             for (let j = 0; j < get[i].serviceDetails.length; j++) {
+//               console.log(get[i].serviceDetails[j].currentMrp);
+//               currentMrp += parseInt(get[i].serviceDetails[j].currentMrp);
+//               mrp += parseInt(get[i].serviceDetails[j].mrp);
+//               delivery += parseInt(get[i].serviceDetails[j].deliveryCharges);
+//             }
+//           }
+//           de = "";
+//           if (delivery == 0) {
+//             de = "Free";
+//           } else {
+//             de = delivery;
+//           }
+
+//           const favorite = await favoriteSchema.aggregate([
+//             {
+//               $match: {
+//                 userId: mongoose.Types.ObjectId(userId),
+//               },
+//             },
+//           ]);
+//           arr = [];
+//           // for(let i = 0 ; i < get.length ;i++){
+//           //   for(let j = 0 ; j < favorite.length ;j++){
+//           //  //   console.log(get[i].serviceId.toString() +" == "+ favorite[j].serviceId.toString())
+//           //     if(get[i].serviceId.toString() == favorite[j].serviceId.toString()){
+//           const gets = await addToCartSchema2.aggregate([
+//             {
+//               $match: {
+//                 $and: [
+//                   {
+//                     userId: mongoose.Types.ObjectId(userId),
+//                   },
+//                   {
+//                     status: 0,
+//                   },
+//                   {
+//                     carModelId: mongoose.Types.ObjectId(
+//                       getuserCar[0].carModelId
+//                     ),
+//                   },
+//                   {
+//                     fuelTypeId: mongoose.Types.ObjectId(getuserCar[0].fuelTypeId),
+//                   },
+//                 ],
+//               },
+//             },
+//             {
+//               $lookup: {
+//                 from: "servicedata2",
+//                 localField: "serviceId",
+//                 foreignField: "_id",
+//                 as: "serviceDetails",
+//               },
+//             },
+
+//             { $unwind: "$serviceDetails" },
+//             {
+//               $project: {
+//                 "serviceDetails.title": 1,
+//                 "serviceDetails.image": 1,
+//                 "serviceDetails.mrp": 1,
+//                 "serviceDetails.currentMrp": 1,
+//                 "serviceDetails.discount": 1,
+//                 "serviceDetails.currentMrp": 1,
+//                 "serviceDetails._id": 1,
+//               },
+//             },
+//           ]);
+
+//           discount =
+//             ((parseInt(mrp) - parseInt(currentMrp)) / parseInt(mrp)) * 100;
+//           discountAmount = parseInt(mrp) - parseInt(currentMrp);
+//           point = "100";
+
+//           // if(parseInt(refferalPoint[0].refferalPoint) >= parseInt(point)){
+//           //   totalPay = parseInt(currentMrp) - parseInt(point)
+//           // }else{
+//           //   totalPay = parseInt(currentMrp) - parseInt(refferalPoint[0].refferalPoint)
+//           // }
+
+//           if (get.length > 0) {
+//             return res.status(200).json({
+//               IsSuccess: true,
+//               count: gets.length,
+//               totalDiscountAmount: discountAmount.toString(),
+//               deliveryCharges: de.toString(),
+//               currentMrp: currentMrp.toString(),
+//               mrp: mrp.toString(),
+//               totalPay: currentMrp.toString(),
+//               discount: discount.toString(),
+//               refferal: "0",
+//               couponAmaunt: "0",
+//               couponCode: "",
+//               discountAmount: discountAmount.toString(),
+//               Data: gets,
+//               Message: " Data Found",
+//             });
+//           } else {
+//             return res.status(200).json({
+//               IsSuccess: true,
+//               count: gets.length,
+//               totalDiscountAmount: "0",
+//               deliveryCharges: de.toString(),
+//               currentMrp: currentMrp.toString(),
+//               mrp: mrp.toString(),
+//               totalPay: currentMrp.toString(),
+//               discount: "0",
+//               refferal: "0",
+//               couponAmaunt: "0",
+//               couponCode: "",
+//               discountAmount: discountAmount.toString(),
+//               Data: [],
+//               Message: "No Data Found",
+//             });
+//           }
+//         }
+//       }
+//     } else {
+//       return res.status(200).json({
+//         IsSuccess: false,
+//         Data: [],
+//         count: 0,
+//         Message: "User Not Selected Any Car",
+//       });
+//     }
+//   } catch (error) {
+//     return res.status(500).json({ IsSuccess: false, Message: error.message });
+//   }
+// });
+
 
 router.post("/deleteAddToCart", async function (req, res, next) {
   try {
@@ -7680,8 +9147,8 @@ router.post("/addNewUserMemberShip", async function (req, res) {
       razorePayOrderId: razorePayOrderId,
       razorePayPaymentId: razorePayPaymentId,
       amount: amount,
-      carId: carId , // added jayshri 11 march 2023
-      carNumber : carNumber
+      carId: carId, // added jayshri 11 march 2023
+      carNumber: carNumber
     });
 
     if (add != null) {
@@ -8715,8 +10182,8 @@ router.post("/addNewBooking_v5", async function (req, res) {
           var data = [];
           var km = [];
           var vernderData = [];
-          console.log("Latitude" ,lat);
-          console.log("Longitude" ,long);
+          console.log("Latitude", lat);
+          console.log("Longitude", long);
           for (let i = 0; i < gets.length; i++) {
             getAll = distances(lat, gets[i].lat, long, gets[i].long);
             getData = {
@@ -8873,7 +10340,7 @@ router.post("/addNewBooking_v5", async function (req, res) {
                       // let updatePrice=await userMemberShipSchema.findByIdAndUpdate(userMemberId,allPriceIs,{new:true});
                     }
                     // return res.status(200).json({ IsSuccess: true, Data:[], Message: 'This type All Service are use' })
-                  } else if (parseInt(memberShipServices[0].service[i].discount) > 0){
+                  } else if (parseInt(memberShipServices[0].service[i].discount) > 0) {
 
                     const update = await userMemberShipSchema.aggregate([
                       {
@@ -8886,29 +10353,29 @@ router.post("/addNewBooking_v5", async function (req, res) {
                     if (update.length > 0) {
                       let today = new Date()
                       let membershipExpireDate = new Date(update.exDateTime)
-                      if (today <= membershipExpireDate){
+                      if (today <= membershipExpireDate) {
                         console.log("geting discount")
-                      }else{
-                      data = 0
-                      let updatePrice =
-                        await userMemberShipSchema.findOneAndUpdate(
-                          {
-                            userId: mongoose.Types.ObjectId(userId),
-                            "service.serviceId": mongoose.Types.ObjectId(
-                              memberShipServices[0].service[i].serviceId
-                            ),
-                          },
-                          { $set: { "service.$.discount": data } },
-                          { new: true }
-                        );
-                      console.log(updatePrice);
-                        }
+                      } else {
+                        data = 0
+                        let updatePrice =
+                          await userMemberShipSchema.findOneAndUpdate(
+                            {
+                              userId: mongoose.Types.ObjectId(userId),
+                              "service.serviceId": mongoose.Types.ObjectId(
+                                memberShipServices[0].service[i].serviceId
+                              ),
+                            },
+                            { $set: { "service.$.discount": data } },
+                            { new: true }
+                          );
+                        console.log(updatePrice);
+                      }
                       // let updatePrice=await userMemberShipSchema.findByIdAndUpdate(userMemberId,allPriceIs,{new:true});
                     }
                     // return res.status(200).json({ IsSuccess: true, Data:[], Message: 'This type All Service are use' })
-                  
 
-                  }else {
+
+                  } else {
                     console.log("This type All Service are use");
                   }
 
@@ -9642,28 +11109,28 @@ router.post("/getBooking_v1", async function (req, res) {
         },
       },
       {
-        $unwind:{
-          path:"$userDetails"
+        $unwind: {
+          path: "$userDetails"
         },
       },
       {
-        $unwind:{
-          path:"$carBrandName"
+        $unwind: {
+          path: "$carBrandName"
         },
       },
       {
-        $unwind:{
-          path:"$carFuelName"
+        $unwind: {
+          path: "$carFuelName"
         },
       },
       {
-        $unwind:{
-          path:"$carModelName"
+        $unwind: {
+          path: "$carModelName"
         },
       },
       {
-        $unwind:{
-          path:"$venderWorkName"
+        $unwind: {
+          path: "$venderWorkName"
         },
       },
       // {
@@ -10730,7 +12197,7 @@ router.post("/getUserSelectedCar", async function (req, res) {
           // "carModelDetails.isActive": 1,
           "carFuelDetails.fuelType": 1,
           status: 1,
-          "carModelDetails":1
+          "carModelDetails": 1
         },
       },
     ]);
@@ -11261,7 +12728,7 @@ router.post("/getRefer", async function (req, res) {
         userPoint: setting[0].userCode,
         referalPoint: setting[0].referralCode,
         totalDiscount: a.toString(),
-        discount:'25',
+        discount: '25',
         code: get[0].randomNo,
         Message: " Data Found",
       });
