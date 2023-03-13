@@ -5643,7 +5643,7 @@ router.post("/getAddToCart_v5", async function (req, res) {
       },
     ]);
 
-    
+
     const getuserCar = await userCarsSchema.aggregate([
       {
         $match: {
@@ -5689,6 +5689,13 @@ router.post("/getAddToCart_v5", async function (req, res) {
           ]);
 
           //   console.log(checkMemberShip[0].service)
+
+          let availedCar ;
+          if (checkMemberShip[0].carId.toString() == getuserCar[0].carModelId.toString()){
+            availedCar = true
+          }else{
+            availedCar = false
+          }
 
           console.log("1");
 
@@ -5751,7 +5758,7 @@ router.post("/getAddToCart_v5", async function (req, res) {
               //console.log(element.serviceId)
               console.log("notttttttt");
               console.log(found);
-              if (found != undefined || found != null) {
+              if ((found != undefined || found != null) && availedCar == true) {
                 console.log(found, "founddetails");
                 if ((parseInt(found.qty) > 0) || (parseInt(found.discount) > 0)) { // added 
                   existIds.push(get[i].serviceDetails[j]._id);
@@ -5995,6 +6002,13 @@ router.post("/getAddToCart_v5", async function (req, res) {
           console.log(checkMemberShip[0].service);
           console.log(coupon);
 
+          let availedCar ;
+          if (checkMemberShip[0].carId.toString() == getuserCar[0].carModelId.toString()){
+            availedCar = true
+          }else{
+            availedCar = false
+          }
+
           const coupons = await couponUseSchema.aggregate([
             {
               $match: {
@@ -6068,7 +6082,7 @@ router.post("/getAddToCart_v5", async function (req, res) {
                   element.serviceId.toString() == get[i].serviceDetails[j].regulerServiceId.toString() // added 
               );
               console.log(found);
-              if (found != undefined || found != null) {
+              if ((found != undefined || found != null) && availedCar == true) {
                 if ((parseInt(found.qty) > 0) || (parseInt(found.discount) > 0)) {
                   existIds.push(get[i].serviceDetails[j]._id);
                   currentMrp += 0;
@@ -6262,6 +6276,13 @@ router.post("/getAddToCart_v5", async function (req, res) {
             },
           ]);
 
+          let availedCar ;
+          if (checkMemberShip[0].carId.toString() == getuserCar[0].carModelId.toString()){
+            availedCar = true
+          }else{
+            availedCar = false
+          }
+
           console.log(checkMemberShip[0].service);
 
           console.log("0");
@@ -6324,7 +6345,7 @@ router.post("/getAddToCart_v5", async function (req, res) {
               );
               console.log("3");
               console.log(found);
-              if (found != undefined || found != null) {
+              if ((found != undefined || found != null) && availedCar == true) {
                 if ((parseInt(found.qty) > 0) || (parseInt(found.discount) > 0)){// added by jayshri to check if membership service is available or not
                   existIds.push(get[i].serviceDetails[j]._id);
                   currentMrp += 0;
