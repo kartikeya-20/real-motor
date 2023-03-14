@@ -5743,6 +5743,7 @@ router.post("/getAddToCart_v5", async function (req, res) {
           discount = 0;
           delivery = 0;
           let existIds = [];
+          let MemServiceAvailabe = false
           // for(let k = 0 ; k < checkMemberShip[0].service.length;k++){
           for (let i = 0; i < get.length; i++) {
             console.log(get);
@@ -5769,6 +5770,7 @@ router.post("/getAddToCart_v5", async function (req, res) {
                   console.log(currentMrp + "  currentMrp");
                   mrp += 0;
                   delivery += parseInt(get[i].serviceDetails[j].deliveryCharges);
+                  MemServiceAvailabe = true
                 } else {
                   console.log("1 total");
                   // existIds.push(get[j].serviceId)
@@ -5962,7 +5964,8 @@ router.post("/getAddToCart_v5", async function (req, res) {
               couponCode: "",
               Data: gets,
               Message: " Data Found",
-              carNumber : checkMemberShip[0].carNumber
+              carNumber : checkMemberShip[0].carNumber,
+              MemServiceAvailabe: MemServiceAvailabe
             });
           } else {
             return res.status(200).json({
@@ -5980,7 +5983,8 @@ router.post("/getAddToCart_v5", async function (req, res) {
               couponCode: "",
               Data: [],
               Message: "No Data Found",
-              carNumber : checkMemberShip[0].carNumber
+              carNumber : checkMemberShip[0].carNumber,
+              MemServiceAvailabe: MemServiceAvailabe
             });
           }
         } else if (status == 2) {
@@ -6071,7 +6075,7 @@ router.post("/getAddToCart_v5", async function (req, res) {
           mrp = 0;
           discount = 0;
           delivery = 0;
-
+          let MemServiceAvailabe = false
           let existIds = [];
           // for(let k = 0 ; k < checkMemberShip[0].service.length;k++){
           for (let i = 0; i < get.length; i++) {
@@ -6090,6 +6094,7 @@ router.post("/getAddToCart_v5", async function (req, res) {
                   currentMrp += 0;
                   mrp += 0;
                   delivery += parseInt(get[i].serviceDetails[j].deliveryCharges);
+                  MemServiceAvailabe = true
                 } else {
                   currentMrp += parseInt(get[i].serviceDetails[j].currentMrp);
                   mrp += parseInt(get[i].serviceDetails[j].mrp);
@@ -6242,7 +6247,8 @@ router.post("/getAddToCart_v5", async function (req, res) {
               couponCode: discountCoupon,
               Data: gets,
               Message: " Data Found",
-              carNumber : checkMemberShip[0].carNumber
+              carNumber : checkMemberShip[0].carNumber,
+              MemServiceAvailabe: MemServiceAvailabe
             });
           } else {
             return res.status(200).json({
@@ -6260,7 +6266,8 @@ router.post("/getAddToCart_v5", async function (req, res) {
               discountAmount: discountAmount.toString(),
               Data: [],
               Message: "No Data Found",
-              carNumber : checkMemberShip[0].carNumber
+              carNumber : checkMemberShip[0].carNumber,
+              MemServiceAvailabe: MemServiceAvailabe
             });
           }
         } else {
@@ -6333,7 +6340,7 @@ router.post("/getAddToCart_v5", async function (req, res) {
           mrp = 0;
           discount = 0;
           delivery = 0;
-
+          let MemServiceAvailabe = false
           let existIds = [];
           // for(let k = 0 ; k < checkMemberShip[0].service.length;k++){
           for (let i = 0; i < get.length; i++) {
@@ -6355,6 +6362,7 @@ router.post("/getAddToCart_v5", async function (req, res) {
                   currentMrp += 0;
                   mrp += 0;
                   delivery += parseInt(get[i].serviceDetails[j].deliveryCharges);
+                  MemServiceAvailabe = true
                 }else{
                   currentMrp += parseInt(get[i].serviceDetails[j].currentMrp);
                   mrp += parseInt(get[i].serviceDetails[j].mrp);
@@ -6504,7 +6512,8 @@ router.post("/getAddToCart_v5", async function (req, res) {
               couponCode: "",
               Data: gets,
               Message: " Data Found",
-              carNumber : checkMemberShip[0].carNumber
+              carNumber : checkMemberShip[0].carNumber,
+              MemServiceAvailabe: MemServiceAvailabe
             });
           } else {
             return res.status(200).json({
@@ -6522,12 +6531,14 @@ router.post("/getAddToCart_v5", async function (req, res) {
               discountAmount: discountAmount.toString(),
               Data: [],
               Message: "No Data Found",
-              carNumber : checkMemberShip[0].carNumber
+              carNumber : checkMemberShip[0].carNumber,
+              MemServiceAvailabe: MemServiceAvailabe
             });
           }
         }
       } else {
         console.log(discountCoupon);
+        let MemServiceAvailabe = false
         if (status == 1) {
           console.log("refferal code");
           const refferalPoint = await userDetailsSchema.aggregate([
@@ -6679,7 +6690,8 @@ router.post("/getAddToCart_v5", async function (req, res) {
               couponCode: "",
               Data: gets,
               Message: " Data Found",
-              carNumber: ""
+              carNumber: "",
+              MemServiceAvailabe: MemServiceAvailabe
             });
           } else {
             return res.status(200).json({
@@ -6697,7 +6709,8 @@ router.post("/getAddToCart_v5", async function (req, res) {
               discountAmount: discountAmount.toString(),
               Data: [],
               Message: "No Data Found",
-              carNumber: ""
+              carNumber: "",
+              MemServiceAvailabe: MemServiceAvailabe
             });
           }
         } else if (status == 2) {
@@ -6885,7 +6898,8 @@ router.post("/getAddToCart_v5", async function (req, res) {
               couponCode: discountCoupon,
               Data: gets,
               Message: " Data Found",
-              carNumber: ""
+              carNumber: "",
+              MemServiceAvailabe: MemServiceAvailabe
             });
           } else {
             return res.status(200).json({
@@ -6903,7 +6917,8 @@ router.post("/getAddToCart_v5", async function (req, res) {
               discountAmount: discountAmount.toString(),
               Data: [],
               Message: "No Data Found",
-              carNumber: ""
+              carNumber: "",
+              MemServiceAvailabe: MemServiceAvailabe
             });
           }
         } else {
@@ -7060,7 +7075,8 @@ router.post("/getAddToCart_v5", async function (req, res) {
               discountAmount: discountAmount.toString(),
               Data: gets,
               Message: " Data Found",
-              carNumber: ""
+              carNumber: "",
+              MemServiceAvailabe: MemServiceAvailabe
             });
           } else {
             return res.status(200).json({
@@ -7078,7 +7094,8 @@ router.post("/getAddToCart_v5", async function (req, res) {
               discountAmount: discountAmount.toString(),
               Data: [],
               Message: "No Data Found",
-              carNumber: ""
+              carNumber: "",
+              MemServiceAvailabe:MemServiceAvailabe
             });
           }
         }
