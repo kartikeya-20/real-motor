@@ -10123,17 +10123,17 @@ router.post("/addNewBooking_v5", async function (req, res) {
     } = req.body;
     let authToken = req.headers["authorization"];
 
-    if (
-      authToken != config.tockenIs ||
-      authToken == null ||
-      authToken == undefined
-    ) {
-      return res.status(200).json({
-        IsSuccess: false,
-        Data: [],
-        Message: "You are not authenticated",
-      });
-    }
+    // if (
+    //   authToken != config.tockenIs ||
+    //   authToken == null ||
+    //   authToken == undefined
+    // ) {
+    //   return res.status(200).json({
+    //     IsSuccess: false,
+    //     Data: [],
+    //     Message: "You are not authenticated",
+    //   });
+    // }
 
     let gets = await userCarsSchema.aggregate([
       {
@@ -10144,7 +10144,27 @@ router.post("/addNewBooking_v5", async function (req, res) {
     ]);
 
     if (gets.length == 1) {
-      let get = await addToCartSchema2.aggregate([
+      // let get = await addToCartSchema2.aggregate([
+      //   {
+      //     $match: {
+      //       $and: [
+      //         {
+      //           userId: mongoose.Types.ObjectId(userId),
+      //         },
+      //         {
+      //           carModelId: mongoose.Types.ObjectId(gets[0].carModelId),
+      //         },
+      //         {
+      //           fuelTypeId: mongoose.Types.ObjectId(gets[0].fuelTypeId),
+      //         },
+      //         { status: 0 },
+      //       ],
+      //     },
+      //   },
+      // ]);
+
+
+      const get = await addToCartSchema2.aggregate([
         {
           $match: {
             $and: [
@@ -10152,16 +10172,36 @@ router.post("/addNewBooking_v5", async function (req, res) {
                 userId: mongoose.Types.ObjectId(userId),
               },
               {
+                status: 0,
+              },
+              {
                 carModelId: mongoose.Types.ObjectId(gets[0].carModelId),
               },
               {
                 fuelTypeId: mongoose.Types.ObjectId(gets[0].fuelTypeId),
               },
-              { status: 0 },
             ],
           },
         },
+        {
+          $lookup: {
+            from: "userdetails",
+            localField: "userId",
+            foreignField: "_id",
+            as: "userDetails",
+          },
+        },
+        {
+          $lookup: {
+            from: "servicedata2",
+            localField: "serviceId",
+            foreignField: "_id",
+            as: "serviceDetails",
+          },
+        },
       ]);
+
+      // console.log(get[0].serviceDetails[0].regulerServiceId)
 
       // console.log("Selected Car Wise Cart", get);
       // console.log(get.length);
@@ -10171,10 +10211,16 @@ router.post("/addNewBooking_v5", async function (req, res) {
           .json({ IsSuccess: true, Message: "plzz add service in cart" });
       } else {
         arr = [];
+        let regularServiceArray = []
         for (let i = 0; i < get.length; i++) {
           arr.push(get[i].serviceId);
+          regularServiceArray.push(get[i].serviceDetails[0].regulerServiceId)
           // console.log(get);
         }
+
+
+
+        // console.log(arr, "getting arr")
 
         const add = await new bookingSchema({
           userId: userId,
@@ -10348,14 +10394,16 @@ router.post("/addNewBooking_v5", async function (req, res) {
             for (let i = 0; i < memberShipServices[0].service.length; i++) {
               console.log("1");
               for (let j = 0; j < add.cartId.length; j++) {
-                console.log(add.cartId[j] + " cartId");
+                // console.log(add.cartId[j] + " cartId");
+                console.log(regularServiceArray[j])
                 console.log(
                   memberShipServices[0].service[i].serviceId + " member"
                 );
                 console.log("2");
                 if (
                   memberShipServices[0].service[i].serviceId.toString() ==
-                  add.cartId[j].toString()
+                  // add.cartId[j].toString()
+                  regularServiceArray[j].toString()
                 ) {
                   console.log("3");
                   console.log(memberShipServices[0].service[i].qty);
