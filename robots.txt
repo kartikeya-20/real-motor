@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Crawl-delay:3
+Sitemap:http://radmin.itfuturz.com/index.php/sitemap.xml
