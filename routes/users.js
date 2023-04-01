@@ -14059,7 +14059,7 @@ router.post("/agreeToTermsAndCondition",async function (req ,res){
   
   const newData = agreeToTermsAndConditionSchema({
     isAgreed: req.body.isAgreed,
-    mobileNo: req.body.myNumber
+    mobileNo: req.body.mobileNo
   });
   newData.save()
     .then(result => {
