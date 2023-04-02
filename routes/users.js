@@ -14053,7 +14053,7 @@ router.post("/memberCalling", async function (req, res, next) {
 //------------------------new api made kartikeya pandey----------------
 router.post("/agreeToTermsAndCondition",async function (req ,res){
   // Validate the input
-  if (!req.body || !req.body.isAgreed || !req.body.myNumber) {
+  if (!req.body || !req.body.isAgreed || !req.body.mobileNo) {
     return res.status(400).json({ message: 'Invalid input' });
   }
   
@@ -14063,11 +14063,11 @@ router.post("/agreeToTermsAndCondition",async function (req ,res){
   });
   newData.save()
     .then(result => {
-      res.status(201).json(result);
+      res.status(200).json(result);
     })
     .catch(err => {
       if (err.code === 11000) {
-        res.status(400).json({ message: 'myNumber must be unique' });
+        res.status(400).json({ message: 'Number must be unique' });
       } else {
         res.status(500).json({ message: 'Error saving data to database' });
       }

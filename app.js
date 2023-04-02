@@ -8,6 +8,8 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var adminRouter = require('./routes/admin');
 var venderRouter = require('./routes/vender');
+var bodyParser = require('body-parser');
+
 
 // const { isatty } = require('tty');
 
@@ -17,7 +19,8 @@ var app = express();
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
-
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(logger('dev'));
 app.use(cors());
 app.use(express.urlencoded({
