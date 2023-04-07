@@ -5619,9 +5619,11 @@ router.post("/addToCart_v5", async function (req, res) {
 });
 
 router.post("/getAddToCart_v5", async function (req, res) {
+  //this is try catch block for any kind of error in the code
   try {
     const { userId, discountCoupon, refferal, status } = req.body;
 
+    //this is for the authorization while hitting the api
     let authToken = req.headers["authorization"];
 
     if (
@@ -5644,7 +5646,7 @@ router.post("/getAddToCart_v5", async function (req, res) {
       },
     ]);
 
-
+    //getting the user car
     const getuserCar = await userCarsSchema.aggregate([
       {
         $match: {
@@ -5664,12 +5666,17 @@ router.post("/getAddToCart_v5", async function (req, res) {
     console.log("SelectedCar", getMember);
 
     //console.log(getMember)
-
+    //if there is a car then this code will run
     if (getuserCar.length == 1) {
+      //memberhsip status 1 means the membership is available
+      //membership status 0 mean the memberhsip is not available
+      
+      //if membership is available following if statement will execute otherwise else statment will execute
       if (getMember[0].memberShipStatus == 1) {
         console.log("MemberShip parson");
 
         //console.log(discountCouponId)
+        //this is for the refereal code 
         if (status == 1) {
           console.log("refferal code");
           console.log("1");
@@ -5988,7 +5995,9 @@ router.post("/getAddToCart_v5", async function (req, res) {
               MemServiceAvailabe: MemServiceAvailabe
             });
           }
-        } else if (status == 2) {
+        } 
+        //status 2 is for the promo code
+        else if (status == 2) {
           console.log("discount code");
 
           const coupon = await discountCouponSchema.aggregate([
@@ -6271,7 +6280,9 @@ router.post("/getAddToCart_v5", async function (req, res) {
               MemServiceAvailabe: MemServiceAvailabe
             });
           }
-        } else {
+        } 
+        //this is status 3 which is normal status
+        else {
           //console.log("refferal code")
           const refferalPoint = await userDetailsSchema.aggregate([
             {
@@ -6537,7 +6548,9 @@ router.post("/getAddToCart_v5", async function (req, res) {
             });
           }
         }
-      } else {
+      } 
+      //if membership is available not available the following if statment will execute
+      else {
         console.log(discountCoupon);
         let MemServiceAvailabe = false
         if (status == 1) {
@@ -7101,7 +7114,9 @@ router.post("/getAddToCart_v5", async function (req, res) {
           }
         }
       }
-    } else {
+    } 
+    //if users has not selected any car than this will be the response 
+    else {
       return res.status(200).json({
         IsSuccess: false,
         Data: [],
@@ -9527,7 +9542,7 @@ router.post("/getUserMemberShip_v5", async function (req, res) {
           foreignField: "_id",
           as: "service.service",
         },
-      },
+      }     ,
       {
         $unwind: {
           path: "$service.service",
@@ -9543,8 +9558,8 @@ router.post("/getUserMemberShip_v5", async function (req, res) {
           memberShipDetailsDescription: {
             $push: "$memberShipUserId.description",
           },
-          memberShipDetailsTimeLimit: { $push: "$memberShipUserId.timeTimit" },
-          //memberShipDetailsTotalMonth:{$push: "$memberShipUserId.totalMonth" },
+          // memberShipDetailsTimeLimit: { $push: "$memberShipUserId.timeTimit" },
+          memberShipDetailsTotalMonth:{$push: "$memberShipUserId.totalMonth" },
           memberShipDetailsPrice: { $push: "$memberShipUserId.price" },
           //memberShipDetailsExDateTime:{ $push: "$memberShipUserId" } ,
           memberService: { $push: "$service" },
@@ -9572,7 +9587,8 @@ router.post("/getUserMemberShip_v5", async function (req, res) {
       },
       {
         $unwind: {
-          path: "$memberShipDetailsTimeLimit",
+          // path: "$memberShipDetailsTimeLimit",
+          path : "$memberShipDetailsTotalMonth"
         },
       },
       {
