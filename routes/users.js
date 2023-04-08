@@ -6386,6 +6386,7 @@ router.post("/getAddToCart_v5", async function (req, res) {
                   currentMrp = currentMrp - discountPrice;
                   mrp += parseInt(get[i].serviceDetails[j].mrp);
                   delivery += parseInt(get[i].serviceDetails[j].deliveryCharges);  
+                    MemServiceAvailabe = true;
                   }
                   else{
                     existIds.push(get[i].serviceDetails[j]._id);
@@ -6529,7 +6530,6 @@ router.post("/getAddToCart_v5", async function (req, res) {
           // }else{
           //   totalPay = parseInt(currentMrp) - parseInt(refferalPoint[0].refferalPoint)
           // }
-
           if (get.length > 0) {
             return res.status(200).json({
               IsSuccess: true,
