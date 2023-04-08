@@ -5664,6 +5664,7 @@ router.post("/getAddToCart_v5", async function (req, res) {
 
     console.log("SelectedCar", getuserCar.length);
     console.log("SelectedCar", getMember);
+    console.log("this is get member", getMember);
 
     //console.log(getMember)
     //if there is a car then this code will run
@@ -6281,7 +6282,7 @@ router.post("/getAddToCart_v5", async function (req, res) {
             });
           }
         } 
-        //this is status 3 which is normal status
+        //this is status 3 which is normal status in which the service is free or at discounted price
         else {
           //console.log("refferal code")
           const refferalPoint = await userDetailsSchema.aggregate([
@@ -6370,11 +6371,29 @@ router.post("/getAddToCart_v5", async function (req, res) {
               console.log(found);
               if ((found != undefined || found != null) && availedCar == true) {
                 if ((parseInt(found.qty) > 0) || (parseInt(found.discount) > 0)){// added by jayshri to check if membership service is available or not
-                  existIds.push(get[i].serviceDetails[j]._id);
-                  currentMrp += 0;
-                  mrp += 0;
-                  delivery += parseInt(get[i].serviceDetails[j].deliveryCharges);
-                  MemServiceAvailabe = true
+                  if(parseInt(found.qty) > 0)
+                  {
+                    existIds.push(get[i].serviceDetails[j]._id);
+                    currentMrp += 0;
+                    mrp += 0;
+                    delivery += parseInt(get[i].serviceDetails[j].deliveryCharges);
+                    MemServiceAvailabe = true;
+                  }
+                  else if(parseInt(found.discount) > 0){
+                  discountPercent = parseInt(found.discount);
+                  currentMrp += parseInt(get[i].serviceDetails[j].currentMrp);
+                  discountPrice = (currentMrp * discountPercent)/100;
+                  currentMrp = currentMrp - discountPrice;
+                  mrp += parseInt(get[i].serviceDetails[j].mrp);
+                  delivery += parseInt(get[i].serviceDetails[j].deliveryCharges);  
+                  }
+                  else{
+                    existIds.push(get[i].serviceDetails[j]._id);
+                    currentMrp += 0;
+                    mrp += 0;
+                    delivery += parseInt(get[i].serviceDetails[j].deliveryCharges);
+                    MemServiceAvailabe = true;
+                  }
                 }else{
                   currentMrp += parseInt(get[i].serviceDetails[j].currentMrp);
                   mrp += parseInt(get[i].serviceDetails[j].mrp);
@@ -6390,6 +6409,9 @@ router.post("/getAddToCart_v5", async function (req, res) {
               // }
             }
           }
+          console.log("currentMrp : ",currentMrp);
+          console.log("mrp : " , mrp);
+          console.log("delivery : ",delivery);
           de = "";
           if (delivery == 0) {
             de = "Free";
@@ -6518,7 +6540,7 @@ router.post("/getAddToCart_v5", async function (req, res) {
               mrp: mrp.toString(),
               totalPay: currentMrp.toString(),
               discountAmount: discountAmount.toString(),
-              discount: discount.toString(),
+              discount: parseInt(discount).toString(),
               refferal: "0",
               couponAmaunt: "0",
               couponCode: "",
