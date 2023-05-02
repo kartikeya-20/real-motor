@@ -23,7 +23,10 @@ const address = mongoose.Schema({
     status: {
         type: Number,
         default: 0
-    } 
+    },
+    pincode : {
+        type : String
+    }
     // 0 not select Address
     // 1 select Address
 });

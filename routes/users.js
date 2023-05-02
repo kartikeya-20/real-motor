@@ -2195,7 +2195,7 @@ router.post("/emailLogin", async function (req, res) {
   }
 });
 
-router.post("/phoneLogin", async function (req, res) {
+router.post("/phone", async function (req, res) {
   try {
     const { phoneNo } = req.body;
 
@@ -5637,7 +5637,6 @@ router.post("/getAddToCart_v5", async function (req, res) {
         Message: "You are not authenticated",
       });
     }
-
     const getMember = await userDetailsSchema.aggregate([
       {
         $match: {
@@ -5645,7 +5644,7 @@ router.post("/getAddToCart_v5", async function (req, res) {
         },
       },
     ]);
-
+    
     //getting the user car
     const getuserCar = await userCarsSchema.aggregate([
       {
@@ -5662,10 +5661,28 @@ router.post("/getAddToCart_v5", async function (req, res) {
       },
     ]);
 
+    if(getuserCar.length == 0)
+    {
+      return res.status(200).json({
+        IsSuccess: false,
+        Data: [],
+        count: 0,
+        Message: "User Not Selected Any Car",
+      });
+    }
+    
+    const MembershipCheck = await userMemberShip.aggregate([
+      {
+        $match: {
+          userId: mongoose.Types.ObjectId(userId),
+          carId : mongoose.Types.ObjectId(getuserCar[0].carModelId)
+        },
+      },
+    ]);
     console.log("SelectedCar", getuserCar.length);
     console.log("SelectedCar", getMember);
     console.log("this is get member", getMember);
-
+    
     //console.log(getMember)
     //if there is a car then this code will run
     if (getuserCar.length == 1) {
@@ -5673,7 +5690,7 @@ router.post("/getAddToCart_v5", async function (req, res) {
       //membership status 0 mean the memberhsip is not available
       
       //if membership is available following if statement will execute otherwise else statment will execute
-      if (getMember[0].memberShipStatus == 1) {
+      if (MembershipCheck.length == 1) {
         console.log("MemberShip parson");
 
         //console.log(discountCouponId)
@@ -6282,7 +6299,7 @@ router.post("/getAddToCart_v5", async function (req, res) {
             });
           }
         } 
-        //this is status 3 which is normal status in which the service is free or at discounted price
+        //this is status 3 which is Memberhsip status in which the service is free or at discounted price
         else {
           //console.log("refferal code")
           const refferalPoint = await userDetailsSchema.aggregate([
@@ -6296,19 +6313,21 @@ router.post("/getAddToCart_v5", async function (req, res) {
             {
               $match: {
                 userId: mongoose.Types.ObjectId(userId),
+                carId : mongoose.Types.ObjectId(getuserCar[0].carModelId)
               },
             },
           ]);
-
+          console.log(`This is the user Detail : \n${getuserCar[0].carModelId.toString()}`);
           let availedCar ;
           if (checkMemberShip[0].carId.toString() == getuserCar[0].carModelId.toString()){
             availedCar = true
           }else{
             availedCar = false
           }
-
+          
           console.log(checkMemberShip[0].service);
-
+          console.log(`The end`); 
+          console.log(checkMemberShip);
           console.log("0");
           const get = await addToCartSchema2.aggregate([
             {
@@ -9205,9 +9224,9 @@ router.post("/addNewUserMemberShip", async function (req, res) {
       },
     ]);
 
-    if (get.length >= 1) {
-      return res.status(200).json({ IsSuccess: true, Message: "Alredy Exits" });
-    }
+    // if (get.length >= 1) {
+    //   return res.status(200).json({ IsSuccess: true, Message: "Already Exits" });
+    // }
 
     var x = parseInt(getMemberShip[0].totalMonth);
     CurrentDate.setMonth(CurrentDate.getMonth() + x);
@@ -9511,11 +9530,25 @@ router.post("/getUserMemberShip_v5", async function (req, res) {
       });
     }
     // console.log(userId);
-
+    const getuserCar = await userCarsSchema.aggregate([
+      {
+        $match: {
+          $and: [
+            {
+              userId: mongoose.Types.ObjectId(userId),
+            },
+            {
+              status: 1,
+            },
+          ],
+        },
+      },
+    ]);
     const get = await userMemberShipSchema.aggregate([
       {
         $match: {
           userId: mongoose.Types.ObjectId(userId),
+          carId : mongoose.Types.ObjectId(getuserCar[0].carModelId)
         },
       },
       {
@@ -9651,7 +9684,7 @@ router.post("/getUserMemberShip_v5", async function (req, res) {
         },
       },
     ]);
-    console.log(get);
+    console.log(get[0]);
 
     if (get.length > 0) {
       return res.status(200).json({
@@ -10414,7 +10447,7 @@ router.post("/addNewBooking_v5", async function (req, res) {
             },
           ]);
 
-          // console.log(memberShipService);
+          console.log(memberShipService);
 
           if (memberShipService.length == 1) {
             console.log("kevil");
@@ -10428,6 +10461,7 @@ router.post("/addNewBooking_v5", async function (req, res) {
                 },
               },
             ]);
+            console.log("this is user membership");
             console.log(memberShipServices);
 
             for (let i = 0; i < memberShipServices[0].service.length; i++) {
@@ -12589,7 +12623,7 @@ const sendResetPasswordMail = async (name, email, emailToken) => {
 
 router.post("/addNewUserAddress", async function (req, res) {
   try {
-    const { userId, address, lat, long, name, phone } = req.body;
+    const { userId, address, lat, long, name, phone , pincode} = req.body;
     let authToken = req.headers["authorization"];
 
     if (
@@ -12632,8 +12666,9 @@ router.post("/addNewUserAddress", async function (req, res) {
       status: 1,
       name: name,
       phone: phone,
+      pincode : pincode
     });
-
+    
     if (add != null) {
       await add.save();
       return res.status(200).json({
@@ -14128,6 +14163,125 @@ async function getSingleMemberPlayerId(memberId) {
   ]);
   return memberToken;
 }
+
+router.post('/getAllMemberShip_v5', async function (req, res) {
+  try {
+    const { userId } = req.body;
+    let authToken = req.headers['authorization'];
+
+    if (authToken != config.tockenIs || authToken == null || authToken == undefined) {
+      return res.status(200).json({ IsSuccess: false, Data: [], Message: "You are not authenticated" });
+    }
+    const getuserCar = await userCarsSchema.aggregate([
+      {
+        $match: {
+          $and: [
+            {
+              userId: mongoose.Types.ObjectId(userId),
+            },
+            {
+              status: 1,
+            },
+          ],
+        },
+      },
+    ]);   
+    const MembershipCheck = await userMemberShip.aggregate([
+      {
+        $match: {
+          userId: mongoose.Types.ObjectId(userId),
+          carId : mongoose.Types.ObjectId(getuserCar[0].carModelId)
+        },
+      },
+    ]);
+    if(MembershipCheck.length == 1)
+    {
+      return res.status(200).json({ IsSuccess: true, Data: [], Message: "No Data Found" })
+    }
+    const get = await memberShipSchema.aggregate([{
+      $match: {
+
+      }
+    },
+    {
+      $unwind: {
+        path: "$service",
+      },
+    },
+    {
+      $lookup: {
+        from: "regulerservices",
+        localField: "service.serviceId",
+        foreignField: "_id",
+        as: "service.service",
+      },
+    },
+    {
+      $unwind: {
+        path: "$service.service",
+      },
+    },
+    {
+      $group: {
+        _id: "$_id",
+        memberService: {
+          $push: "$service",
+        },
+      },
+    },
+    {
+      $lookup: {
+        from: "memberships",
+        localField: "_id",
+        foreignField: "_id",
+        as: "orderDetails",
+      },
+    },
+    {
+      $unwind: {
+        path: "$orderDetails",
+      },
+    },
+    {
+      $addFields: {
+        "orderDetails.memberService": "$memberService",
+      },
+    },
+    {
+      $replaceRoot: {
+        newRoot: "$orderDetails",
+      },
+    },
+    {
+      $sort: { title: 1 }
+    },
+    {
+      $project: {
+        _id: 1,
+        memberShipId: 1,
+        "memberService.qty": 1,
+        "memberService.discount": 1,
+        "memberService.service.title": 1,
+        "memberService.service._id": 1,
+        title: 1,
+        description: 1,
+        timeTimit: 1,
+        price: 1,
+        totalMonth: 1,
+      },
+    },
+    ]);
+    if (get.length > 0) {
+      return res.status(200).json({ IsSuccess: true, count: get.length, Data: get, Message: " Data Found" })
+    } else {
+      return res.status(200).json({ IsSuccess: true, Data: [], Message: "No Data Found" })
+    }
+
+
+  } catch (error) {
+    return res.status(500).json({ IsSuccess: false, Message: error.message })
+  }
+});
 
 //Send Notification via oneSignal
 var sendOneSignalNotification = function (
