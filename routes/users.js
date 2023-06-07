@@ -13233,6 +13233,74 @@ router.post("/updateUserJobCartApproved", async function (req, res) {
   }
 });
 
+router.post("/updateUserJobCartRejected", async function (req, res) {
+  try {
+    const { bookingId, trackBooking } = req.body;
+
+    let authToken = req.headers["authorization"];
+
+    if (
+      authToken != config.tockenIs ||
+      authToken == null ||
+      authToken == undefined
+    ) {
+      return res.status(200).json({
+        IsSuccess: false,
+        Data: [],
+        Message: "You are not authenticated",
+      });
+    }
+
+    const get = await bookingSchema.aggregate([
+      {
+        $match: {
+          _id: mongoose.Types.ObjectId(bookingId),
+        },
+      },
+    ]);
+
+    const gets = await venderWork.aggregate([
+      {
+        $match: {
+          bookingId: mongoose.Types.ObjectId(bookingId),
+        },
+      },
+    ]);
+    console.log(get);
+    console.log(gets);
+    if (get[0].trackBooking == 2) {
+
+      if (gets.length == 1) {
+        let updateIs;
+        updateIs = {
+          serviceStatus: 2,
+        };
+        let updateIss = await venderWork.findByIdAndUpdate(
+          gets[0]._id,
+          updateIs,
+          { new: true }
+        );
+        console.log(updateIss);
+      }
+    }
+
+    if (get.length > 0) {
+      return res.status(200).json({
+        IsSuccess: true,
+        count: get.length,
+        Data: get,
+        Message: " Data Found",
+      });
+    } else {
+      return res
+        .status(200)
+        .json({ IsSuccess: true, Data: [], Message: "No Data Found" });
+    }
+  } catch (error) {
+    return res.status(500).json({ IsSuccess: false, Message: error.message });
+  }
+});
+
 // ------------------------- FeedBack -------- Paras -----------
 router.post("/addFeedBack", async function (req, res) {
   try {
