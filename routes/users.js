@@ -110,6 +110,7 @@ router.get("/", function (req, res, next) {
 var FCM = require("fcm-node");
 const { weekdays } = require("moment-timezone");
 const { stat } = require("fs/promises");
+const jobCartV5 = require("../models/jobCartV5");
 var serverKey =
   "AAAA3pER8QA:APA91bGj9ZLwI3BQHzN5NDMlVxJww7fQKWgJGBFZ4tG8ByW0zbUFg8cQYpwzkdFE2T2etuzP9YV4O7BGATjbIGrzaSQQFT1ayK_uheqDoOWt4k4o8AVRPRGiH7TJWASnfJbBv3gAPDX0";
 var fcm = new FCM(serverKey);
@@ -13233,6 +13234,8 @@ router.post("/updateUserJobCartApproved", async function (req, res) {
   }
 });
 
+
+//done by kartikeya pandey
 router.post("/updateUserJobCartRejected", async function (req, res) {
   try {
     const { bookingId, trackBooking } = req.body;
@@ -13266,6 +13269,8 @@ router.post("/updateUserJobCartRejected", async function (req, res) {
         },
       },
     ]);
+
+    
     console.log(get);
     console.log(gets);
     if (get[0].trackBooking == 2) {
@@ -13284,6 +13289,8 @@ router.post("/updateUserJobCartRejected", async function (req, res) {
       }
     }
 
+    var jobCartDelete = await jobCartV5.deleteOne({bookingId : bookingId});
+    console.log(jobCartDelete);
     if (get.length > 0) {
       return res.status(200).json({
         IsSuccess: true,
