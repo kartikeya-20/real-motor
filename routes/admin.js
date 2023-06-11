@@ -38,7 +38,8 @@ const rezarpay = require('../models/rezerpay');
 const venderWork = require('../models/venderWork');
 const venderNotification = require('../models/venderNotification')
 const adminDetails = require('../models/adminDetails')
-const adminAscend = require('../models/adminAscend')
+const adminAscend = require('../models/adminAscend');
+const userMemberShip = require('../models/userMemberShip');
 //---------- Multer Image ----- kevil--------------
 ///
 router.post('/getAllVenderNear', async function (req, res) {
@@ -1832,7 +1833,7 @@ router.post('/addNewCarModel', async function (req, res) {
 router.post('/addIsActiveTrue', async function (req, res) {
   try {
 
-    let updateData = await carModelSchema.updateMany({isActive:null}, {
+    let updateData = await carModelSchema.updateMany({ isActive: null }, {
       $set: {
         isActive: true
       }
@@ -4409,6 +4410,121 @@ router.post('/getServiceCategory', async function (req, res) {
   }
 });
 
+// ------------------getting all the user information - kartikeya 
+router.get("/getAllUserInformation", async function (req, res) {
+  try {
+    let authToken = req.headers["authorization"];
+
+    if (
+      authToken != config.tockenIs ||
+      authToken == null ||
+      authToken == undefined
+    ) {
+      return res.status(200).json({
+        IsSuccess: false,
+        Data: [],
+        Message: "You are not authenticated",
+      });
+    }
+
+    const get = await userDetails.find();
+
+    if (get.length > 0) {
+      return res.status(200).json({
+        isSuccess: true,
+        count: get.length,
+        Data: get,
+        Message: "Data found"
+      })
+    }
+    else {
+      return res.status(200).json({
+        isSuccess: true,
+        Data: [],
+        Message: "No Data Found"
+      })
+    }
+  } catch (error) {
+    res.status(500).json({ Message: `${error}`, error: "Internal Server Error" })
+  }
+});
+
+// ------------------getting all the user information - kartikeya 
+router.get("/getAllMembershipInformation", async function (req, res) {
+  try {
+    let authToken = req.headers["authorization"];
+
+    if (
+      authToken != config.tockenIs ||
+      authToken == null ||
+      authToken == undefined
+    ) {
+      return res.status(200).json({
+        IsSuccess: false,
+        Data: [],
+        Message: "You are not authenticated",
+      });
+    }
+
+    // const get = await userMemberShipSchema.find()
+    //   .populate({ path: "userId", model: "userdetails" })
+    //   .populate({ path: "memberShipId", model: "memberships" })
+    //   .populate({ path: "service.serviceId", model: "RegulerServices" })
+    //   .populate({ path: "carId", model: "carModel" });  
+    const get = await userMemberShip.aggregate([
+      {
+        $lookup: {
+          from: "userdetails",
+          localField: "userId",
+          foreignField: "_id",
+          as: "userDetails",
+        },
+      },
+      {
+        $lookup: {
+          from: "memberships",
+          localField: "memberShipId",
+          foreignField: "_id",
+          as: "membershipDetails",
+        },
+      },
+      {
+        $lookup: {
+          from: "regulerservices", // Updated model name
+          localField: "service.serviceId",
+          foreignField: "_id",
+          as: "serviceDetails",
+        },
+      },
+      {
+        $lookup: {
+          from: "carmodels", // Updated model name
+          localField: "carId",
+          foreignField: "_id",
+          as: "carDetails",
+        },
+      },
+    ]);
+    if (get.length > 0) {
+      return res.status(200).json({
+        isSuccess: true,
+        count: get.length,
+        Data: get,
+        Message: "Data found"
+      })
+    }
+    else {
+      return res.status(200).json({
+        isSuccess: true,
+        Data: [],
+        Message: "No Data Found"
+      })
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ Message: `${error}`, error: "Internal Server Error" })
+  }
+});
 // =============== car Brand --------------------
 
 var storage = multer.diskStorage({
