@@ -4449,6 +4449,40 @@ router.get("/getAllUserInformation", async function (req, res) {
   }
 });
 
+//deleteing vendour
+router.delete("/deleteVendor", async function (req, res) {
+  try {
+    const { vendorId } = req.body;
+    const isValidId = mongoose.Types.ObjectId.isValid(vendorId);
+    
+    if (!isValidId) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid vendorId",
+      });
+    }
+
+    const deletedVendor = await venderSchema.deleteOne({ _id: mongoose.Types.ObjectId(vendorId) });
+
+    if (deletedVendor.deletedCount === 1) {
+      return res.status(200).json({
+        success: true,
+        message: "Vendor deleted successfully",
+      });
+    } else {
+      return res.status(404).json({
+        success: false,
+        message: "Vendor not found",
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message,
+    });
+  }
+});
 // ------------------getting all the user information - kartikeya 
 router.get("/getAllMembershipInformation", async function (req, res) {
   try {
@@ -4502,6 +4536,14 @@ router.get("/getAllMembershipInformation", async function (req, res) {
           localField: "carId",
           foreignField: "_id",
           as: "carDetails",
+        },
+      },
+      {
+        $project: {
+          carModelName: { $arrayElemAt: ["$carModel.modelName", 0] },
+          membershipDetails: 1,
+          userName: { $arrayElemAt: ["$userDetails.name", 0] },
+          userPhone: { $arrayElemAt: ["$userDetails.phoneNo", 0] },
         },
       },
     ]);
