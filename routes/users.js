@@ -10163,6 +10163,11 @@ router.post("/addNewBooking", async function (req, res) {
 });
 
 //------------------------------------  Paras ----------------------------------
+const workShopFCM = require("fcm-node");
+var workShopServerKey =
+  "AAAAfYi_NwQ:APA91bFJVACXXx97QMDwwLbQz2jc-vAA1_awRdgFKhcaBTU9RMoMyxqYr1Vd669ngZk-3Bo5N_sKEJG7E7MQkSdgpv64t7PWDYW3rKhHJGDp0Ff5nNIPysnXSbvZxXqNhPKwbBsEGj6Z";
+var workShopfcm = new workShopFCM(workShopServerKey);
+
 router.post("/addNewBooking_v5", async function (req, res) {
   try {
     const {
@@ -10407,7 +10412,7 @@ router.post("/addNewBooking_v5", async function (req, res) {
 
             if (venderBooking != null) {
               await venderBooking.save();
-
+              
               const venderNotifications = await new venderNotification({
                 title: "New Vender Work",
                 image: "uploads/notificationIcon/Group18.png",
@@ -10415,9 +10420,46 @@ router.post("/addNewBooking_v5", async function (req, res) {
                 date: getCurrentDateTime(),
                 venderId: venderBooking.venderId,
               });
-
+              
               if (venderNotifications != null) {
                 await venderNotifications.save();
+                const venderFCM = await venderSchema.aggregate([
+                  {
+                    $match: { _id: mongoose.Types.ObjectId(venderBooking.venderId) },
+                  },
+                ]);
+      
+                for (let i = 0; i < venderFCM.length; i++) {
+                  const element = venderFCM[i];
+                  console.log(element);
+      
+                  
+      
+                  if (venderNotifications != null) {
+                    var message = {
+                      to: element.fcm,
+                      notification: {
+                        title: "New Booking Added!",
+                        // body: "Booking",
+                      },
+                      // data: { //you can send only notification or only data(or include both)
+                      //     title: 'ok cdfsdsdfsd',
+                      //     body: '{"name" : "okg ooggle ogrlrl","product_id" : "123","final_price" : "0.00035"}'
+                      // }
+                    };
+                    workShopfcm.send(message, function (err, response) {
+                      if (err) {
+                        console.log("Something has gone wrong!" + err);
+                        console.log("Respponse:! " + response);
+                      } else {
+                        // showToast("Successfully sent with response");
+                        console.log("Successfully sent with response: ", response);
+                      }
+                    });
+                  } else {
+                    console.log("Error");
+                  }
+                }
               }
             }
           } else {
@@ -10433,6 +10475,7 @@ router.post("/addNewBooking_v5", async function (req, res) {
 
             if (venderBooking != null) {
               await venderBooking.save();
+              
             }
           }
 

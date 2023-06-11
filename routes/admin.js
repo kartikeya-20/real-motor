@@ -40,6 +40,55 @@ const venderNotification = require('../models/venderNotification')
 const adminDetails = require('../models/adminDetails')
 const adminAscend = require('../models/adminAscend');
 const userMemberShip = require('../models/userMemberShip');
+var FCM = require("fcm-node");
+var serverKey =
+  "AAAAfYi_NwQ:APA91bFJVACXXx97QMDwwLbQz2jc-vAA1_awRdgFKhcaBTU9RMoMyxqYr1Vd669ngZk-3Bo5N_sKEJG7E7MQkSdgpv64t7PWDYW3rKhHJGDp0Ff5nNIPysnXSbvZxXqNhPKwbBsEGj6Z";
+var fcm = new FCM(serverKey);
+
+router.post("/Notifications", async function (req, res) {
+  try {
+    let authToken = req.headers["authorization"];
+
+    if (
+      authToken != config.tockenIs ||
+      authToken == null ||
+      authToken == undefined
+    ) {
+      return res.status(200).json({
+        IsSuccess: false,
+        Data: [],
+        Message: "You are not authenticated",
+      });
+    }
+
+    var message = {
+      to: "ccv9PqibQAW_5JNumaBjyb:APA91bHHbiaukx6WVEeWMhZFC_wHs96N10Vq9e4Irhw3lUMW3pWyGCJKeJ6W_JOWGktuCP4aimQe1XgwrpZXDxYRCnNI-PL5YnL5QEHVIW5B1NZMckjyD15X5yEmAiC_QDTctuaExvvm",
+      notification: {
+        title: "kartikeya",
+        body: "Real Motors",
+      },
+
+      // data: { //you can send only notification or only data(or include both)
+      //     title: 'ok cdfsdsdfsd',
+      //     body: '{"name" : "okg ooggle ogrlrl","product_id" : "123","final_price" : "0.00035"}'
+      // }
+    };
+
+    fcm.send(message, function (err, response) {
+      if (err) {
+        console.log("Something has gone wrong!" + err);
+        console.log("Respponse:! " + response);
+      } else {
+        // showToast("Successfully sent with response");
+        console.log("Successfully sent with response: ", response);
+      }
+    });
+
+    // return res.status(200).json({ IsSuccess: true, Message:" Data Found"})
+  } catch (error) {
+    return res.status(500).json({ IsSuccess: false, Message: error.message });
+  }
+});
 //---------- Multer Image ----- kevil--------------
 ///
 router.post('/getAllVenderNear', async function (req, res) {
@@ -4046,7 +4095,6 @@ router.post('/UpdateVenderAssenWork', async function (req, res) {
     }
     ]);
     // service image 
-
     if (update.length == 1) {
       let updateIs;
       updateIs = {
@@ -4062,6 +4110,42 @@ router.post('/UpdateVenderAssenWork', async function (req, res) {
       })
       if (venderNotifications != null) {
         await venderNotifications.save()
+        const venderFCM = await venderSchema.aggregate([
+          {
+            $match: { _id: mongoose.Types.ObjectId(venderId) },
+          },
+        ]);
+        for (let i = 0; i < venderFCM.length; i++) {
+          const element = venderFCM[i];
+          console.log(element.fcm);
+        
+          
+
+          if (venderNotifications != null) {
+            var message = {
+              to: element.fcm,
+              notification: {
+                title: "New Booking Added!",
+                // body: "Booking",
+              },
+              // data: { //you can send only notification or only data(or include both)
+              //     title: 'ok cdfsdsdfsd',
+              //     body: '{"name" : "okg ooggle ogrlrl","product_id" : "123","final_price" : "0.00035"}'
+              // }
+            };
+            fcm.send(message, function (err, response) {
+              if (err) {
+                console.log("Something has gone wrong!" + err);
+                console.log("Respponse:! " + response);
+              } else {
+                // showToast("Successfully sent with response");
+                console.log("Successfully sent with response: ", response);
+              }
+            });
+          } else {
+            console.log("Error");
+          }
+        }
       }
       return res.status(200).json({ IsSuccess: true, Data: [updateIss], Message: `Updated Data` });
     } else {
