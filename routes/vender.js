@@ -16,7 +16,7 @@ const venderNotification = require('../models/venderNotification')
 const notificationSchema = require('../models/notification')
 const jobcartV5Schema = require('../models/jobCartV5');
 const jobCartV5 = require('../models/jobCartV5');
-
+const serviceSchema2 = require("../models/service2")
 //------------------venderDetails-----------kevil --------------
 
 
@@ -620,9 +620,84 @@ router.post('/addNewCarImage', async function (req, res) {
 });
 
 
+//get the car images from the vendor side 
+router.post("/getCarImage", async function (req, res) {
+  try {
+    let authToken = req.headers['authorization'];
+
+    if (authToken != config.tockenIs || authToken == null || authToken == undefined) {
+      return res.status(200).json({ IsSuccess: false, Data: [], Message: "You are not authenticated" });
+    }
+    
+    const { bookingId } = req.body;
+    const get = await carVerifiedImage.aggregate([
+      {
+        $match: {
+          bookingId: mongoose.Types.ObjectId(bookingId)
+        }
+      }
+    ]);
+    if (get.length > 0) {
+      res.status(200).json({
+        IsSuccess: true,
+        Data: get,
+        Message: "Data Found"
+      });
+    } else {
+      res.status(200).json({
+        IsSuccess: true,
+        Data: [],
+        Message: "No Data Found"
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({ IsSuccess: false, Data: 0, Message: error.message })
+  }
+});
+
+router.post("/getUserService", async function (req, res) {
+  try {
+    const { serviceId } = req.body;
+    let authToken = req.headers["authorization"];
+
+    if (
+      authToken != config.tockenIs ||
+      authToken == null ||
+      authToken == undefined
+    ) {
+      return res.status(200).json({
+        IsSuccess: false,
+        Data: [],
+        Message: "You are not authenticated",
+      });
+    }
 
 
 
+
+    const get = await serviceSchema2.aggregate([
+      {
+        $match: {
+          _id: mongoose.Types.ObjectId(serviceId),
+        },
+      },
+    ]);
+    if (get.length > 0) {
+      return res.status(200).json({
+        IsSuccess: true,
+        count: get.length,
+        Data: get,
+        Message: " Data Found",
+      });
+    } else {
+      return res
+        .status(200)
+        .json({ IsSuccess: true, Data: [], Message: "No Data Found" });
+    }
+  } catch (error) {
+    return res.status(500).json({ IsSuccess: false, Message: error.message });
+  }
+});
 // router.post('/UpdateUserProfile', async function (req, res) {
 //   try {
 //     const {venderId , bookingId , serviceStatus} = req.body
