@@ -37,6 +37,10 @@ const jobCart = mongoose.Schema({
              type: String,
              default: ""
             },
+            labourPrice : { 
+                type : String,
+                default : ""
+            },
             title: {
                 type: String,
                 default: ""
