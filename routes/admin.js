@@ -4534,8 +4534,21 @@ router.get("/getAllUserInformation", async function (req, res) {
 });
 
 //deleteing vendour
-router.delete("/deleteVendor", async function (req, res) {
+router.delete("/deleteVender", async function (req, res) {
   try {
+    let authToken = req.headers["authorization"];
+
+    if (
+      authToken != config.tockenIs ||
+      authToken == null ||
+      authToken == undefined
+    ) {
+      return res.status(200).json({
+        IsSuccess: false,
+        Data: [],
+        Message: "You are not authenticated",
+      });
+    }
     const { vendorId } = req.body;
     const isValidId = mongoose.Types.ObjectId.isValid(vendorId);
     

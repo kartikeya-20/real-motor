@@ -9532,6 +9532,7 @@ router.post("/getUserMemberShip_v5", async function (req, res) {
       });
     }
     // console.log(userId);
+    
     const getuserCar = await userCarsSchema.aggregate([
       {
         $match: {
@@ -9546,108 +9547,231 @@ router.post("/getUserMemberShip_v5", async function (req, res) {
         },
       },
     ]);
+    
+    
+    //this is query takes too long to respond for large volume of the data
+    // console.log(userId);
+    // const get = await userMemberShipSchema.aggregate([
+    //   {
+    //     $match: {
+    //       userId: mongoose.Types.ObjectId(userId),
+    //       carId : mongoose.Types.ObjectId(getuserCar[0].carModelId)
+    //     },
+    //   },
+    //   {
+    //     $lookup: {
+    //       from: "usermemberships",
+    //       localField: "userId",
+    //       foreignField: "userId",
+    //       as: "userDetails",
+    //     },
+    //   },
+    //   {
+    //     $unwind: {
+    //       path: "$userDetails",
+    //     },
+    //   },
+    //   {
+    //     $lookup: {
+    //       from: "memberships",
+    //       localField: "memberShipId",
+    //       foreignField: "_id",
+    //       as: "memberShipUserId",
+    //     },
+    //   },
+    //   {
+    //     $unwind: {
+    //       path: "$memberShipUserId",
+    //     },
+    //   },
+    //   // {
+    //   //   $lookup:{
+    //   //     from: "memberships",
+    //   //     localField: "memberShipDetails.memberShipId",
+    //   //     foreignField: "_id",
+    //   //     as: "memberShipDetails",
+    //   //   }
+    //   // },
+    //   {
+    //     $unwind: {
+    //       path: "$service",
+    //     },
+    //   },
+    //   {
+    //     $lookup: {
+    //       from: "regulerservices",
+    //       localField: "service.serviceId",
+    //       foreignField: "_id",
+    //       as: "service.service",
+    //     },
+    //   }     ,
+    //   {
+    //     $unwind: {
+    //       path: "$service.service",
+    //     },
+    //   },
+    //   {
+    //     $group: {
+    //       _id: "$_id",
+    //       // memberShipsss: { $push: '$$ROOT'},
+    //       memberUserId: { $push: "$userDetails" },
+    //       memberShipDetails: { $push: "$memberShipUserId" },
+    //       memberShipDetailsMem: { $push: "$memberShipUserId.title" },
+    //       memberShipDetailsDescription: {
+    //         $push: "$memberShipUserId.description",
+    //       },
+    //       // memberShipDetailsTimeLimit: { $push: "$memberShipUserId.timeTimit" },
+    //       memberShipDetailsTotalMonth:{$push: "$memberShipUserId.totalMonth" },
+    //       memberShipDetailsPrice: { $push: "$memberShipUserId.price" },
+    //       //memberShipDetailsExDateTime:{ $push: "$memberShipUserId" } ,
+    //       memberService: { $push: "$service" },
+    //     },
+    //   },
+    //   {
+    //     $unwind: {
+    //       path: "$memberShipDetails",
+    //     },
+    //   },
+    //   {
+    //     $unwind: {
+    //       path: "$memberUserId",
+    //     },
+    //   },
+    //   {
+    //     $unwind: {
+    //       path: "$memberShipDetailsMem",
+    //     },
+    //   },
+    //   {
+    //     $unwind: {
+    //       path: "$memberShipDetailsDescription",
+    //     },
+    //   },
+    //   {
+    //     $unwind: {
+    //       // path: "$memberShipDetailsTimeLimit",
+    //       path : "$memberShipDetailsTotalMonth"
+    //     },
+    //   },
+    //   {
+    //     $project: {
+    //       userId: 1,
+    //       "memberShipDetails.title": 1,
+    //       "memberShipDetails.description": 1,
+    //       "memberShipDetails.timeTimit": 1,
+    //       "memberShipDetails.price": 1,
+    //       "memberShipDetails.totalMonth": 1,
+    //       "memberUserId._id": 1,
+    //       "memberUserId.memberShipId": 1,
+    //       "memberUserId.buyDateTime": 1,
+    //       "memberUserId.exDateTime": 1,
+    //       //"memberShipDetailsMem":1,
+    //       // "memberShipDetailsDescription":1,
+    //       // "memberShipDetailsTimeLimit":1,
+    //       // "memberShipDetailsPrice":1,
+    //       //"memberShipDetailsTotalMonth":1,
+    //       // "memberShipDetailsExDateTime":1,
+    //       // "books.buyDateTime":1,
+    //       // "books.exDateTime":1,
+    //       // "books.amount":1,
+    //       // "books.userId":1,
+    //       _id: 1,
+    //       // "userDetails.buyDateTime":1,
+    //       buyDateTime: 1,
+    //       exDateTime: 1,
+    //       amount: 1,
+    //       "memberService.qty": 1,
+    //       "memberService.discount": 1,
+    //       "memberService.service.title": 1,
+    //       "memberService.service._id": 1,
+    //       //"memberShipDetails":1,
+    //       description: 1,
+    //       timeTimit: 1,
+    //       price: 1,
+    //     },
+    //   },
+    // ]);
     const get = await userMemberShipSchema.aggregate([
       {
         $match: {
           userId: mongoose.Types.ObjectId(userId),
-          carId : mongoose.Types.ObjectId(getuserCar[0].carModelId)
-        },
+          carId: mongoose.Types.ObjectId(getuserCar[0].carModelId)
+        }
       },
       {
         $lookup: {
           from: "usermemberships",
-          localField: "userId",
-          foreignField: "userId",
-          as: "userDetails",
-        },
+          let: { userId: "$userId" },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$userId", "$$userId"] }
+              }
+            },
+            {
+              $lookup: {
+                from: "memberships",
+                localField: "memberShipId",
+                foreignField: "_id",
+                as: "memberShipUserId"
+              }
+            },
+            {
+              $unwind: "$memberShipUserId"
+            }
+          ],
+          as: "userDetails"
+        }
+      },
+      {
+        $unwind: "$userDetails"
+      },
+      {
+        $unwind: "$userDetails.memberShipUserId"
       },
       {
         $unwind: {
-          path: "$userDetails",
-        },
-      },
-      {
-        $lookup: {
-          from: "memberships",
-          localField: "memberShipId",
-          foreignField: "_id",
-          as: "memberShipUserId",
-        },
-      },
-      {
-        $unwind: {
-          path: "$memberShipUserId",
-        },
-      },
-      // {
-      //   $lookup:{
-      //     from: "memberships",
-      //     localField: "memberShipDetails.memberShipId",
-      //     foreignField: "_id",
-      //     as: "memberShipDetails",
-      //   }
-      // },
-      {
-        $unwind: {
-          path: "$service",
-        },
+          path: "$service"
+        }
       },
       {
         $lookup: {
           from: "regulerservices",
           localField: "service.serviceId",
           foreignField: "_id",
-          as: "service.service",
-        },
-      }     ,
+          as: "service.service"
+        }
+      },
       {
-        $unwind: {
-          path: "$service.service",
-        },
+        $unwind: "$service.service"
       },
       {
         $group: {
           _id: "$_id",
-          // memberShipsss: { $push: '$$ROOT'},
           memberUserId: { $push: "$userDetails" },
-          memberShipDetails: { $push: "$memberShipUserId" },
-          memberShipDetailsMem: { $push: "$memberShipUserId.title" },
-          memberShipDetailsDescription: {
-            $push: "$memberShipUserId.description",
-          },
-          // memberShipDetailsTimeLimit: { $push: "$memberShipUserId.timeTimit" },
-          memberShipDetailsTotalMonth:{$push: "$memberShipUserId.totalMonth" },
-          memberShipDetailsPrice: { $push: "$memberShipUserId.price" },
-          //memberShipDetailsExDateTime:{ $push: "$memberShipUserId" } ,
+          memberShipDetails: { $push: "$userDetails.memberShipUserId" },
+          memberShipDetailsMem: { $push: "$userDetails.memberShipUserId.title" },
+          memberShipDetailsDescription: { $push: "$userDetails.memberShipUserId.description" },
+          memberShipDetailsTotalMonth: { $push: "$userDetails.memberShipUserId.totalMonth" },
+          memberShipDetailsPrice: { $push: "$userDetails.memberShipUserId.price" },
           memberService: { $push: "$service" },
-        },
+        }
       },
       {
-        $unwind: {
-          path: "$memberShipDetails",
-        },
+        $unwind: "$memberShipDetails"
       },
       {
-        $unwind: {
-          path: "$memberUserId",
-        },
+        $unwind: "$memberUserId"
       },
-      {
-        $unwind: {
-          path: "$memberShipDetailsMem",
-        },
-      },
-      {
-        $unwind: {
-          path: "$memberShipDetailsDescription",
-        },
-      },
-      {
-        $unwind: {
-          // path: "$memberShipDetailsTimeLimit",
-          path : "$memberShipDetailsTotalMonth"
-        },
-      },
+      // {
+      //   $unwind: "$memberShipDetailsMem"
+      // },
+      // {
+      //   $unwind: "$memberShipDetailsDescription"
+      // },
+      // {
+      //   $unwind: "$memberShipDetailsTotalMonth"
+      // },
       {
         $project: {
           userId: 1,
@@ -9660,18 +9784,7 @@ router.post("/getUserMemberShip_v5", async function (req, res) {
           "memberUserId.memberShipId": 1,
           "memberUserId.buyDateTime": 1,
           "memberUserId.exDateTime": 1,
-          //"memberShipDetailsMem":1,
-          // "memberShipDetailsDescription":1,
-          // "memberShipDetailsTimeLimit":1,
-          // "memberShipDetailsPrice":1,
-          //"memberShipDetailsTotalMonth":1,
-          // "memberShipDetailsExDateTime":1,
-          // "books.buyDateTime":1,
-          // "books.exDateTime":1,
-          // "books.amount":1,
-          // "books.userId":1,
           _id: 1,
-          // "userDetails.buyDateTime":1,
           buyDateTime: 1,
           exDateTime: 1,
           amount: 1,
@@ -9679,13 +9792,14 @@ router.post("/getUserMemberShip_v5", async function (req, res) {
           "memberService.discount": 1,
           "memberService.service.title": 1,
           "memberService.service._id": 1,
-          //"memberShipDetails":1,
           description: 1,
           timeTimit: 1,
           price: 1,
-        },
+        }
       },
     ]);
+    
+
     console.log(get[0]);
 
     if (get.length > 0) {

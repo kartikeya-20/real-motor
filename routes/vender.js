@@ -1801,6 +1801,7 @@ router.post('/addNewJobCart_v2', async function (req, res) {
         pdf: pdfs,
         image: img
       });
+      console.log("this is add");
       console.log(add);
 
       if (add != null) {
@@ -1862,7 +1863,6 @@ router.post('/addNewJobCart_v2', async function (req, res) {
 router.post('/UpdateJobCart', async function (req, res) {
   try {
     const { jobCartId, venderId, bookingId, title, description, details, pdf, image} = req.body
-
     const update = await jobcartV5Schema.aggregate([{
       $match: {
         _id: mongoose.Types.ObjectId(jobCartId)
@@ -1911,6 +1911,7 @@ router.post('/UpdateJobCart', async function (req, res) {
         image: img != undefined ? img : "",
       }
       let updateIss = await jobcartV5Schema.findByIdAndUpdate(jobCartId, updateIs, { new: true })
+      console.log(updateIss);
       return res.status(200).json({ IsSuccess: true, Data: [updateIss], Message: `Updated Data` });
     } else {
       return res.status(200).json({ IsSuccess: true, Data: [], Message: 'Not Found' })
