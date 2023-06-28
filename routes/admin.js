@@ -41,6 +41,7 @@ const adminDetails = require('../models/adminDetails')
 const adminAscend = require('../models/adminAscend');
 const userMemberShip = require('../models/userMemberShip');
 var FCM = require("fcm-node");
+const service2 = require('../models/service2');
 var serverKey =
   "AAAAfYi_NwQ:APA91bFJVACXXx97QMDwwLbQz2jc-vAA1_awRdgFKhcaBTU9RMoMyxqYr1Vd669ngZk-3Bo5N_sKEJG7E7MQkSdgpv64t7PWDYW3rKhHJGDp0Ff5nNIPysnXSbvZxXqNhPKwbBsEGj6Z";
 var fcm = new FCM(serverKey);
@@ -1199,6 +1200,121 @@ router.post('/getService_v5', async function (req, res) {
     return res.status(500).json({ IsSuccess: false, Message: error.message })
   }
 });
+router.put("/batchUpdate", async (req, res) => {
+  try {
+    const { subCategoryId, mrp, currentMrp, discount } = req.body;
+
+    // Validate the request body
+    if (!Array.isArray(subCategoryId) || subCategoryId.length === 0) {
+      return res.status(400).json({ message: "Invalid request body" });
+    }
+
+    if (!mrp || !currentMrp || !discount) {
+      return res.status(400).json({ message: "Invalid update format" });
+    }
+
+    const bulkOperations = [];
+
+    for (let i = 0; i < subCategoryId.length; i++) {
+      const bulkUpdate = {
+        updateOne: {
+          filter: { _id: mongoose.Types.ObjectId(subCategoryId[i]) },
+          update: {
+            $set: {
+              mrp: mrp,
+              currentMrp: currentMrp,
+              discount: discount,
+            },
+          },
+        },
+      };
+
+      bulkOperations.push(bulkUpdate);
+    }
+
+    // Perform the bulk update
+    const result = await service2.bulkWrite(bulkOperations);
+    if(result){
+
+      res.json({
+        message: "Services updated successfully",
+        updatedCount: result.modifiedCount,
+      });
+    }
+    else {
+      res.json({
+        messgae : "Unable to update the data"
+      })
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// router.put("/batchUpdate", async (req, res) => {
+//   try {
+//     const { subCategoryId, id, regulerServiceId, mrp, currentMrp, discount } = req.body;
+
+//     // Validate the request body
+//     if (
+//       !Array.isArray(subCategoryId) ||
+//       subCategoryId.length === 0 ||
+//       !Array.isArray(id) ||
+//       id.length === 0 ||
+//       !Array.isArray(regulerServiceId) ||
+//       regulerServiceId.length === 0
+//     ) {
+//       return res.status(400).json({ message: "Invalid request body" });
+//     }
+
+//     if (!mrp || !currentMrp || !discount) {
+//       return res.status(400).json({ message: "Invalid update format" });
+//     }
+
+//     if (id.length !== regulerServiceId.length || id.length !== subCategoryId.length) {
+//       return res.status(400).json({ message: "Mismatch in the number of ids, subCategoryIds, and regulerServiceIds" });
+//     }
+
+//     const bulkOperations = [];
+
+//     for (let i = 0; i < ids.length; i++) {
+//       const bulkUpdate = {
+//         updateOne: {
+//           filter: { _id: mongoose.Types.ObjectId(id[i]) },
+//           update: {
+//             $set: {
+//               mrp: mrp,
+//               currentMrp: currentMrp,
+//               discount: discount,
+//               regulerServiceId: mongoose.Types.ObjectId(regulerServiceId[i]),
+//               subCategoryId: mongoose.Types.ObjectId(subCategoryId[i])
+//             },
+//           },
+//         },
+//       };
+
+//       bulkOperations.push(bulkUpdate);
+//     }
+
+//     // Perform the bulk update
+//     const result = await service2.bulkWrite(bulkOperations);
+
+//     if (result.length === 1) {
+//       res.json({
+//         message: "Services updated successfully",
+//         updatedCount: result.modifiedCount,
+//       });
+//     } else {
+//       res.json({
+//         message: "Unable to update the data",
+//       });
+//     }
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: "Internal server error" });
+//   }
+// });
 
 router.post('/getAllService_v5', async function (req, res) {
   try {
