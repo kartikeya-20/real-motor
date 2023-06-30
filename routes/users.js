@@ -10620,6 +10620,7 @@ router.post("/addNewBooking_v5", async function (req, res) {
               {
                 $match: {
                   userId: mongoose.Types.ObjectId(memberShipService[0]._id),
+                  carId : mongoose.Types.ObjectId(gets[0].carModelId)
                 },
               },
             ]);
