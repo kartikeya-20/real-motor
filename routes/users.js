@@ -10359,7 +10359,7 @@ router.post("/addNewBooking_v5", async function (req, res) {
       //   },
       // ]);
 
-
+      const userCarModelId = gets[0].carModelId;
       const get = await addToCartSchema2.aggregate([
         {
           $match: {
@@ -10620,7 +10620,7 @@ router.post("/addNewBooking_v5", async function (req, res) {
               {
                 $match: {
                   userId: mongoose.Types.ObjectId(memberShipService[0]._id),
-                  carId : mongoose.Types.ObjectId(gets[0].carModelId)
+                  carId : mongoose.Types.ObjectId(userCarModelId)
                 },
               },
             ]);
