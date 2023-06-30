@@ -951,55 +951,53 @@ router.post('/getService', async function (req, res) {
 // ------------------------------ Paras Update Service API ----------------------------
 router.post('/updateService', async function (req, res) {
   try {
-    const { serviceId,
-      title,
-      mrp,
-      currentMrp,
-      discount,
-      service,
-      image,
-      icons } = req.body
+    const { subCategoryId, mrp, currentMrp, discount } = req.body;
 
-    const update = await serviceSchema.aggregate([{
-      $match: {
-        _id: mongoose.Types.ObjectId(serviceId)
-      }
+    // Validate the request body
+    // if (!Array.isArray(subCategoryId) || subCategoryId.length === 0) {
+    //   return res.status(400).json({ message: "Invalid request body" });
+    // }
+
+    // if (!mrp || !currentMrp || !discount) {
+    //   return res.status(400).json({ message: "Invalid update format" });
+    // }
+
+    const bulkOperations = [];
+
+    for (let i = 0; i < subCategoryId.length; i++) {
+      const bulkUpdate = {
+        updateOne: {
+          filter: { _id: mongoose.Types.ObjectId(subCategoryId[i]) },
+          update: {
+            $set: {
+              mrp: mrp,
+              currentMrp: currentMrp,
+              discount: discount,
+            },
+          },
+        },
+      };
+
+      bulkOperations.push(bulkUpdate);
     }
-    ]);
 
-    let imagePath = [];
-    if (image != undefined && image != null && image != [] && image != "") {
-      if (image.length > 0) {
-        let listStringToBase64 = image.split(",");
-        listStringToBase64.forEach(dateIs => {
-          const path = "uploads/carModel/" + Date.now() + ".png"
-          const base64Date = dateIs.replace(/^data:([A-Za-z-+/]+);base64,/, '');
-          fs.writeFileSync(path, base64Date, { encoding: "base64" });
-          imagePath.push(path);
-        });
-      }
+    // Perform the bulk update
+    const result = await service2.bulkWrite(bulkOperations);
+    if(result){
+
+      res.json({
+        message: "Services updated successfully",
+        updatedCount: result.modifiedCount,
+      });
     }
-    img = imagePath.pop()
-
-    if (update.length == 1) {
-      let updateIs;
-      updateIs = {
-        title: title != undefined ? title : update[0].title,
-        mrp: mrp != undefined ? mrp : update[0].mrp,
-        currentMrp: currentMrp != undefined ? currentMrp : update[0].currentMrp,
-        discount: discount != undefined ? discount : update[0].discount,
-        service: service != undefined ? service : update[0].service,
-        image: img != undefined ? img : update[0].image,
-        icons: icons != undefined ? icons : update[0].icons,
-      }
-      let updateIss = await serviceSchema.findByIdAndUpdate(serviceId, updateIs, { new: true })
-
-      return res.status(200).json({ IsSuccess: true, Data: [updateIss], Message: `Updated Data` });
-    } else {
-      return res.status(200).json({ IsSuccess: true, Data: [], Message: 'Not Found' })
+    else {
+      res.json({
+        messgae : "Unable to update the data"
+      })
     }
   } catch (error) {
-    return res.status(500).json({ IsSuccess: false, Message: error.message })
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 

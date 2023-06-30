@@ -9547,10 +9547,10 @@ router.post("/getUserMemberShip_v5", async function (req, res) {
         },
       },
     ]);
-    
+    console.log(getuserCar);
     
     //this is query takes too long to respond for large volume of the data
-    // console.log(userId);
+    console.log(userId);
     // const get = await userMemberShipSchema.aggregate([
     //   {
     //     $match: {
@@ -9747,7 +9747,10 @@ router.post("/getUserMemberShip_v5", async function (req, res) {
       },
       {
         $group: {
-          _id: "$_id",
+          _id: {
+            memberId: "$userDetails._id",
+            // carId: "$carId"
+          },
           memberUserId: { $push: "$userDetails" },
           memberShipDetails: { $push: "$userDetails.memberShipUserId" },
           memberShipDetailsMem: { $push: "$userDetails.memberShipUserId.title" },
@@ -9756,7 +9759,7 @@ router.post("/getUserMemberShip_v5", async function (req, res) {
           memberShipDetailsPrice: { $push: "$userDetails.memberShipUserId.price" },
           memberService: { $push: "$service" },
         }
-      },
+      },            
       {
         $unwind: "$memberShipDetails"
       },
