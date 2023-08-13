@@ -37,6 +37,7 @@ const walletSchema = require("../models/wallet");
 const userMemberShipSchema = require("../models/userMemberShip");
 const memberShipSchema = require("../models/memberShip");
 const userSOSchema = require("../models/userSOS");
+const notificationToken = require("../models/notificationToken");
 const venderSOSchema = require("../models/venderSOS");
 const { title } = require("process");
 const { get } = require("http");
@@ -316,6 +317,24 @@ router.post("/addNewUserSOS", async function (req, res) {
               console.log("Successfully sent with response: ", response);
             }
           });
+          const getNotification = await notificationToken.find();
+                    for(let i = 0 ; i < getNotification.length ; i++){
+                      var adminMessage = {
+                        to: getNotification[i].token,
+                        notification: {
+                          title: "Emergency SOS Occured!",
+                        },
+                      };
+                      workShopfcm.send(adminMessage, function (err, response) {
+                        if (err) {
+                          console.log("Something has gone wrong!" + err);
+                          console.log("Respponse:! " + response);
+                        } else {
+                          // showToast("Successfully sent with response");
+                          console.log("Successfully sent with response: ", response);
+                        }
+                      });
+                    }
         } else {
           console.log("Error");
         }
@@ -5646,7 +5665,7 @@ router.post("/getAddToCart_v5", async function (req, res) {
         },
       },
     ]);
-    
+
     //getting the user car
     const getuserCar = await userCarsSchema.aggregate([
       {
@@ -5663,8 +5682,7 @@ router.post("/getAddToCart_v5", async function (req, res) {
       },
     ]);
 
-    if(getuserCar.length == 0)
-    {
+    if (getuserCar.length == 0) {
       return res.status(200).json({
         IsSuccess: false,
         Data: [],
@@ -5672,25 +5690,25 @@ router.post("/getAddToCart_v5", async function (req, res) {
         Message: "User Not Selected Any Car",
       });
     }
-    
+
     const MembershipCheck = await userMemberShip.aggregate([
       {
         $match: {
           userId: mongoose.Types.ObjectId(userId),
-          carId : mongoose.Types.ObjectId(getuserCar[0].carModelId)
+          carId: mongoose.Types.ObjectId(getuserCar[0].carModelId)
         },
       },
     ]);
     console.log("SelectedCar", getuserCar.length);
     console.log("SelectedCar", getMember);
     console.log("this is get member", getMember);
-    
+
     //console.log(getMember)
     //if there is a car then this code will run
     if (getuserCar.length == 1) {
       //memberhsip status 1 means the membership is available
       //membership status 0 mean the memberhsip is not available
-      
+
       //if membership is available following if statement will execute otherwise else statment will execute
       if (MembershipCheck.length == 1) {
         console.log("MemberShip parson");
@@ -5718,10 +5736,10 @@ router.post("/getAddToCart_v5", async function (req, res) {
 
           //   console.log(checkMemberShip[0].service)
 
-          let availedCar ;
-          if (checkMemberShip[0].carId.toString() == getuserCar[0].carModelId.toString()){
+          let availedCar;
+          if (checkMemberShip[0].carId.toString() == getuserCar[0].carModelId.toString()) {
             availedCar = true
-          }else{
+          } else {
             availedCar = false
           }
 
@@ -5992,7 +6010,7 @@ router.post("/getAddToCart_v5", async function (req, res) {
               couponCode: "",
               Data: gets,
               Message: " Data Found",
-              carNumber : checkMemberShip[0].carNumber,
+              carNumber: checkMemberShip[0].carNumber,
               MemServiceAvailabe: MemServiceAvailabe
             });
           } else {
@@ -6011,11 +6029,11 @@ router.post("/getAddToCart_v5", async function (req, res) {
               couponCode: "",
               Data: [],
               Message: "No Data Found",
-              carNumber : checkMemberShip[0].carNumber,
+              carNumber: checkMemberShip[0].carNumber,
               MemServiceAvailabe: MemServiceAvailabe
             });
           }
-        } 
+        }
         //status 2 is for the promo code
         else if (status == 2) {
           console.log("discount code");
@@ -6038,10 +6056,10 @@ router.post("/getAddToCart_v5", async function (req, res) {
           console.log(checkMemberShip[0].service);
           console.log(coupon);
 
-          let availedCar ;
-          if (checkMemberShip[0].carId.toString() == getuserCar[0].carModelId.toString()){
+          let availedCar;
+          if (checkMemberShip[0].carId.toString() == getuserCar[0].carModelId.toString()) {
             availedCar = true
-          }else{
+          } else {
             availedCar = false
           }
 
@@ -6277,7 +6295,7 @@ router.post("/getAddToCart_v5", async function (req, res) {
               couponCode: discountCoupon,
               Data: gets,
               Message: " Data Found",
-              carNumber : checkMemberShip[0].carNumber,
+              carNumber: checkMemberShip[0].carNumber,
               MemServiceAvailabe: MemServiceAvailabe
             });
           } else {
@@ -6296,11 +6314,11 @@ router.post("/getAddToCart_v5", async function (req, res) {
               discountAmount: discountAmount.toString(),
               Data: [],
               Message: "No Data Found",
-              carNumber : checkMemberShip[0].carNumber,
+              carNumber: checkMemberShip[0].carNumber,
               MemServiceAvailabe: MemServiceAvailabe
             });
           }
-        } 
+        }
         //this is status 3 which is Memberhsip status in which the service is free or at discounted price
         else {
           //console.log("refferal code")
@@ -6315,20 +6333,20 @@ router.post("/getAddToCart_v5", async function (req, res) {
             {
               $match: {
                 userId: mongoose.Types.ObjectId(userId),
-                carId : mongoose.Types.ObjectId(getuserCar[0].carModelId)
+                carId: mongoose.Types.ObjectId(getuserCar[0].carModelId)
               },
             },
           ]);
           console.log(`This is the user Detail : \n${getuserCar[0].carModelId.toString()}`);
-          let availedCar ;
-          if (checkMemberShip[0].carId.toString() == getuserCar[0].carModelId.toString()){
+          let availedCar;
+          if (checkMemberShip[0].carId.toString() == getuserCar[0].carModelId.toString()) {
             availedCar = true
-          }else{
+          } else {
             availedCar = false
           }
-          
+
           console.log(checkMemberShip[0].service);
-          console.log(`The end`); 
+          console.log(`The end`);
           console.log(checkMemberShip);
           console.log("0");
           const get = await addToCartSchema2.aggregate([
@@ -6391,37 +6409,36 @@ router.post("/getAddToCart_v5", async function (req, res) {
               console.log("3");
               console.log(found);
               if ((found != undefined || found != null) && availedCar == true) {
-                if ((parseInt(found.qty) > 0) || (parseInt(found.discount) > 0)){// added by jayshri to check if membership service is available or not
-                  if(parseInt(found.qty) > 0)
-                  {
+                if ((parseInt(found.qty) > 0) || (parseInt(found.discount) > 0)) {// added by jayshri to check if membership service is available or not
+                  if (parseInt(found.qty) > 0) {
                     existIds.push(get[i].serviceDetails[j]._id);
                     currentMrp += 0;
                     mrp += 0;
                     delivery += parseInt(get[i].serviceDetails[j].deliveryCharges);
                     MemServiceAvailabe = true;
                   }
-                  else if(parseInt(found.discount) > 0){
-                  discountPercent = parseInt(found.discount);
-                  currentMrp += parseInt(get[i].serviceDetails[j].currentMrp);
-                  discountPrice = (currentMrp * discountPercent)/100;
-                  currentMrp = currentMrp - discountPrice;
-                  mrp += parseInt(get[i].serviceDetails[j].mrp);
-                  delivery += parseInt(get[i].serviceDetails[j].deliveryCharges);  
+                  else if (parseInt(found.discount) > 0) {
+                    discountPercent = parseInt(found.discount);
+                    currentMrp += parseInt(get[i].serviceDetails[j].currentMrp);
+                    discountPrice = (currentMrp * discountPercent) / 100;
+                    currentMrp = currentMrp - discountPrice;
+                    mrp += parseInt(get[i].serviceDetails[j].mrp);
+                    delivery += parseInt(get[i].serviceDetails[j].deliveryCharges);
                     MemServiceAvailabe = true;
                   }
-                  else{
+                  else {
                     existIds.push(get[i].serviceDetails[j]._id);
                     currentMrp += 0;
                     mrp += 0;
                     delivery += parseInt(get[i].serviceDetails[j].deliveryCharges);
                     MemServiceAvailabe = true;
                   }
-                }else{
+                } else {
                   currentMrp += parseInt(get[i].serviceDetails[j].currentMrp);
                   mrp += parseInt(get[i].serviceDetails[j].mrp);
                   delivery += parseInt(get[i].serviceDetails[j].deliveryCharges);
                 }
-                
+
               } else {
                 currentMrp += parseInt(get[i].serviceDetails[j].currentMrp);
                 mrp += parseInt(get[i].serviceDetails[j].mrp);
@@ -6431,9 +6448,9 @@ router.post("/getAddToCart_v5", async function (req, res) {
               // }
             }
           }
-          console.log("currentMrp : ",currentMrp);
-          console.log("mrp : " , mrp);
-          console.log("delivery : ",delivery);
+          console.log("currentMrp : ", currentMrp);
+          console.log("mrp : ", mrp);
+          console.log("delivery : ", delivery);
           de = "";
           if (delivery == 0) {
             de = "Free";
@@ -6567,7 +6584,7 @@ router.post("/getAddToCart_v5", async function (req, res) {
               couponCode: "",
               Data: gets,
               Message: " Data Found",
-              carNumber : checkMemberShip[0].carNumber,
+              carNumber: checkMemberShip[0].carNumber,
               MemServiceAvailabe: MemServiceAvailabe
             });
           } else {
@@ -6586,12 +6603,12 @@ router.post("/getAddToCart_v5", async function (req, res) {
               discountAmount: discountAmount.toString(),
               Data: [],
               Message: "No Data Found",
-              carNumber : checkMemberShip[0].carNumber,
+              carNumber: checkMemberShip[0].carNumber,
               MemServiceAvailabe: MemServiceAvailabe
             });
           }
         }
-      } 
+      }
       //if membership is available not available the following if statment will execute
       else {
         console.log(discountCoupon);
@@ -7152,12 +7169,12 @@ router.post("/getAddToCart_v5", async function (req, res) {
               Data: [],
               Message: "No Data Found",
               carNumber: "",
-              MemServiceAvailabe:MemServiceAvailabe
+              MemServiceAvailabe: MemServiceAvailabe
             });
           }
         }
       }
-    } 
+    }
     //if users has not selected any car than this will be the response 
     else {
       return res.status(200).json({
@@ -9532,7 +9549,7 @@ router.post("/getUserMemberShip_v5", async function (req, res) {
       });
     }
     // console.log(userId);
-    
+
     const getuserCar = await userCarsSchema.aggregate([
       {
         $match: {
@@ -9548,9 +9565,10 @@ router.post("/getUserMemberShip_v5", async function (req, res) {
       },
     ]);
     console.log(getuserCar);
-    
+
     //this is query takes too long to respond for large volume of the data
     console.log(userId);
+
     // const get = await userMemberShipSchema.aggregate([
     //   {
     //     $match: {
@@ -9691,6 +9709,9 @@ router.post("/getUserMemberShip_v5", async function (req, res) {
     //     },
     //   },
     // ]);
+
+    //updated latest code
+
     const get = await userMemberShipSchema.aggregate([
       {
         $match: {
@@ -9701,11 +9722,19 @@ router.post("/getUserMemberShip_v5", async function (req, res) {
       {
         $lookup: {
           from: "usermemberships",
-          let: { userId: "$userId" },
+          let: { userId: "$userId", carId: "$carId" },
           pipeline: [
             {
               $match: {
-                $expr: { $eq: ["$userId", "$$userId"] }
+                $expr: {
+                  $and: [
+                    {
+                      $eq: ["$userId", "$$userId"]
+                    },
+                    { $eq: ["$carId", "$$carId"] }
+                  ]
+                },
+
               }
             },
             {
@@ -9749,7 +9778,7 @@ router.post("/getUserMemberShip_v5", async function (req, res) {
         $group: {
           _id: {
             memberId: "$userDetails._id",
-            // carId: "$carId"
+            carId: "$carId"
           },
           memberUserId: { $push: "$userDetails" },
           memberShipDetails: { $push: "$userDetails.memberShipUserId" },
@@ -9759,7 +9788,7 @@ router.post("/getUserMemberShip_v5", async function (req, res) {
           memberShipDetailsPrice: { $push: "$userDetails.memberShipUserId.price" },
           memberService: { $push: "$service" },
         }
-      },            
+      },
       {
         $unwind: "$memberShipDetails"
       },
@@ -9801,7 +9830,7 @@ router.post("/getUserMemberShip_v5", async function (req, res) {
         }
       },
     ]);
-    
+
 
     console.log(get[0]);
 
@@ -10530,7 +10559,7 @@ router.post("/addNewBooking_v5", async function (req, res) {
 
             if (venderBooking != null) {
               await venderBooking.save();
-              
+
               const venderNotifications = await new venderNotification({
                 title: "New Vender Work",
                 image: "uploads/notificationIcon/Group18.png",
@@ -10538,7 +10567,7 @@ router.post("/addNewBooking_v5", async function (req, res) {
                 date: getCurrentDateTime(),
                 venderId: venderBooking.venderId,
               });
-              
+
               if (venderNotifications != null) {
                 await venderNotifications.save();
                 const venderFCM = await venderSchema.aggregate([
@@ -10546,13 +10575,13 @@ router.post("/addNewBooking_v5", async function (req, res) {
                     $match: { _id: mongoose.Types.ObjectId(venderBooking.venderId) },
                   },
                 ]);
-      
+
                 for (let i = 0; i < venderFCM.length; i++) {
                   const element = venderFCM[i];
                   console.log(element);
-      
-                  
-      
+
+
+
                   if (venderNotifications != null) {
                     var message = {
                       to: element.fcm,
@@ -10574,6 +10603,31 @@ router.post("/addNewBooking_v5", async function (req, res) {
                         console.log("Successfully sent with response: ", response);
                       }
                     });
+                    
+                    const getNotification = await notificationToken.find();
+                    for(let i = 0 ; i < getNotification.length ; i++){
+                      var adminMessage = {
+                        to: getNotification[i].token,
+                        notification: {
+                          title: "New Booking Added!",
+                          // body: "Booking",
+                        },
+                        // data: { //you can send only notification or only data(or include both)
+                        //     title: 'ok cdfsdsdfsd',
+                        //     body: '{"name" : "okg ooggle ogrlrl","product_id" : "123","final_price" : "0.00035"}'
+                        // }
+                      };
+                      workShopfcm.send(adminMessage, function (err, response) {
+                        if (err) {
+                          console.log("Something has gone wrong!" + err);
+                          console.log("Respponse:! " + response);
+                        } else {
+                          // showToast("Successfully sent with response");
+                          console.log("Successfully sent with response: ", response);
+                        }
+                      });
+                    }
+                    
                   } else {
                     console.log("Error");
                   }
@@ -10593,7 +10647,7 @@ router.post("/addNewBooking_v5", async function (req, res) {
 
             if (venderBooking != null) {
               await venderBooking.save();
-              
+
             }
           }
 
@@ -10620,7 +10674,7 @@ router.post("/addNewBooking_v5", async function (req, res) {
               {
                 $match: {
                   userId: mongoose.Types.ObjectId(memberShipService[0]._id),
-                  carId : mongoose.Types.ObjectId(userCarModelId)
+                  carId: mongoose.Types.ObjectId(userCarModelId)
                 },
               },
             ]);
@@ -10655,6 +10709,7 @@ router.post("/addNewBooking_v5", async function (req, res) {
                       {
                         $match: {
                           userId: mongoose.Types.ObjectId(userId),
+                          carId: mongoose.Types.ObjectId(userCarModelId)
                         },
                       },
                     ]);
@@ -10667,6 +10722,7 @@ router.post("/addNewBooking_v5", async function (req, res) {
                             "service.serviceId": mongoose.Types.ObjectId(
                               memberShipServices[0].service[i].serviceId
                             ),
+                            carId: mongoose.Types.ObjectId(userCarModelId)
                           },
                           { $set: { "service.$.qty": data } },
                           { new: true }
@@ -10681,6 +10737,7 @@ router.post("/addNewBooking_v5", async function (req, res) {
                       {
                         $match: {
                           userId: mongoose.Types.ObjectId(userId),
+                          carId: mongoose.Types.ObjectId(userCarModelId)
                         },
                       },
                     ]);
@@ -10699,6 +10756,7 @@ router.post("/addNewBooking_v5", async function (req, res) {
                               "service.serviceId": mongoose.Types.ObjectId(
                                 memberShipServices[0].service[i].serviceId
                               ),
+                              carId: mongoose.Types.ObjectId(userCarModelId)
                             },
                             { $set: { "service.$.discount": data } },
                             { new: true }
@@ -12786,7 +12844,7 @@ const sendResetPasswordMail = async (name, email, emailToken) => {
 
 router.post("/addNewUserAddress", async function (req, res) {
   try {
-    const { userId, address, lat, long, name, phone , pincode} = req.body;
+    const { userId, address, lat, long, name, phone, pincode } = req.body;
     let authToken = req.headers["authorization"];
 
     if (
@@ -12829,9 +12887,9 @@ router.post("/addNewUserAddress", async function (req, res) {
       status: 1,
       name: name,
       phone: phone,
-      pincode : pincode
+      pincode: pincode
     });
-    
+
     if (add != null) {
       await add.save();
       return res.status(200).json({
@@ -13432,7 +13490,7 @@ router.post("/updateUserJobCartRejected", async function (req, res) {
       },
     ]);
 
-    
+
     console.log(get);
     console.log(gets);
     if (get[0].trackBooking == 2) {
@@ -13451,7 +13509,7 @@ router.post("/updateUserJobCartRejected", async function (req, res) {
       }
     }
 
-    var jobCartDelete = await jobCartV5.deleteOne({bookingId : bookingId});
+    var jobCartDelete = await jobCartV5.deleteOne({ bookingId: bookingId });
     console.log(jobCartDelete);
     if (get.length > 0) {
       return res.status(200).json({
@@ -14361,12 +14419,12 @@ router.post("/memberCalling", async function (req, res, next) {
 });
 
 //------------------------new api made kartikeya pandey----------------
-router.post("/agreeToTermsAndCondition",async function (req ,res){
+router.post("/agreeToTermsAndCondition", async function (req, res) {
   // Validate the input
   if (!req.body || !req.body.isAgreed || !req.body.mobileNo) {
     return res.status(400).json({ message: 'Invalid input' });
   }
-  
+
   const newData = agreeToTermsAndConditionSchema({
     isAgreed: req.body.isAgreed,
     mobileNo: req.body.mobileNo
@@ -14382,7 +14440,7 @@ router.post("/agreeToTermsAndCondition",async function (req ,res){
         res.status(500).json({ message: 'Error saving data to database' });
       }
     });
-}); 
+});
 //Get Single member PlayerId
 async function getSingleMemberPlayerId(memberId) {
   let memberIdIs = String(memberId);
@@ -14422,17 +14480,16 @@ router.post('/getAllMemberShip_v5', async function (req, res) {
           ],
         },
       },
-    ]);   
+    ]);
     const MembershipCheck = await userMemberShip.aggregate([
       {
         $match: {
           userId: mongoose.Types.ObjectId(userId),
-          carId : mongoose.Types.ObjectId(getuserCar[0].carModelId)
+          carId: mongoose.Types.ObjectId(getuserCar[0].carModelId)
         },
       },
     ]);
-    if(MembershipCheck.length == 1)
-    {
+    if (MembershipCheck.length == 1) {
       return res.status(200).json({ IsSuccess: true, Data: [], Message: "No Data Found" })
     }
     const get = await memberShipSchema.aggregate([{

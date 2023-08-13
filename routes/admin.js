@@ -40,8 +40,10 @@ const venderNotification = require('../models/venderNotification')
 const adminDetails = require('../models/adminDetails')
 const adminAscend = require('../models/adminAscend');
 const userMemberShip = require('../models/userMemberShip');
+const notificationToken = require("../models/notificationToken");
 var FCM = require("fcm-node");
 const service2 = require('../models/service2');
+const { log } = require('console');
 var serverKey =
   "AAAAfYi_NwQ:APA91bFJVACXXx97QMDwwLbQz2jc-vAA1_awRdgFKhcaBTU9RMoMyxqYr1Vd669ngZk-3Bo5N_sKEJG7E7MQkSdgpv64t7PWDYW3rKhHJGDp0Ff5nNIPysnXSbvZxXqNhPKwbBsEGj6Z";
 var fcm = new FCM(serverKey);
@@ -983,7 +985,7 @@ router.post('/updateService', async function (req, res) {
 
     // Perform the bulk update
     const result = await service2.bulkWrite(bulkOperations);
-    if(result){
+    if (result) {
 
       res.json({
         message: "Services updated successfully",
@@ -992,7 +994,7 @@ router.post('/updateService', async function (req, res) {
     }
     else {
       res.json({
-        messgae : "Unable to update the data"
+        messgae: "Unable to update the data"
       })
     }
   } catch (error) {
@@ -1232,7 +1234,7 @@ router.put("/batchUpdate", async (req, res) => {
 
     // Perform the bulk update
     const result = await service2.bulkWrite(bulkOperations);
-    if(result){
+    if (result) {
 
       res.json({
         message: "Services updated successfully",
@@ -1241,7 +1243,7 @@ router.put("/batchUpdate", async (req, res) => {
     }
     else {
       res.json({
-        messgae : "Unable to update the data"
+        messgae: "Unable to update the data"
       })
     }
   } catch (error) {
@@ -4232,8 +4234,8 @@ router.post('/UpdateVenderAssenWork', async function (req, res) {
         for (let i = 0; i < venderFCM.length; i++) {
           const element = venderFCM[i];
           console.log(element.fcm);
-        
-          
+
+
 
           if (venderNotifications != null) {
             var message = {
@@ -4665,7 +4667,7 @@ router.delete("/deleteVender", async function (req, res) {
     }
     const { vendorId } = req.body;
     const isValidId = mongoose.Types.ObjectId.isValid(vendorId);
-    
+
     if (!isValidId) {
       return res.status(400).json({
         success: false,
@@ -4694,6 +4696,60 @@ router.delete("/deleteVender", async function (req, res) {
     });
   }
 });
+
+router.post("/addNotificationToken", async function(req,res){
+  try {
+    let authToken = req.headers["authorization"];
+
+    if (
+      authToken != config.tockenIs ||
+      authToken == null ||
+      authToken == undefined
+    ) {
+      return res.status(200).json({
+        IsSuccess: false,
+        Data: [],
+        Message: "You are not authenticated",
+      });
+    }
+
+    const { token } = req.body;
+    notificationToken.findOne({ token })
+    .then(existingToken => {
+      if (existingToken) {
+        return res.json({ message: 'Token already exists' });
+      }
+
+      // If the token does not exist, create a new NotificationToken document and save it to the database
+      const newToken = new notificationToken({ token : token });
+
+      newToken.save()
+        .then(() => {
+          res.json({ message: 'Token added successfully' });
+        })
+        .catch((err) => {
+          console.error('Error saving token:', err);
+          res.status(500).json({ error: 'Failed to add token' });
+        });
+    })
+    .catch((err) => {
+      console.error('Error checking token:', err);
+      res.status(500).json({ error: 'Failed to check token' });
+    });
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ Message: `${error}`, error: "Internal Server Error" })
+  }
+});
+
+router.get("/testN",async function (req,res){
+  const get = await notificationToken.find();
+  for(let i = 0 ; i < get.length ; i++){
+    console.log(get[i].token);
+  }
+  return res.json(get);
+})
 // ------------------getting all the user information - kartikeya 
 router.get("/getAllMembershipInformation", async function (req, res) {
   try {
@@ -4711,53 +4767,47 @@ router.get("/getAllMembershipInformation", async function (req, res) {
       });
     }
 
-    // const get = await userMemberShipSchema.find()
-    //   .populate({ path: "userId", model: "userdetails" })
-    //   .populate({ path: "memberShipId", model: "memberships" })
-    //   .populate({ path: "service.serviceId", model: "RegulerServices" })
-    //   .populate({ path: "carId", model: "carModel" });  
     const get = await userMemberShip.aggregate([
       {
         $lookup: {
           from: "userdetails",
           localField: "userId",
           foreignField: "_id",
-          as: "userDetails",
-        },
+          as: "user"
+        }
+      },
+      {
+        $lookup: {
+          from: "carmodels",
+          localField: "carId",
+          foreignField: "_id",
+          as: "car"
+        }
       },
       {
         $lookup: {
           from: "memberships",
           localField: "memberShipId",
           foreignField: "_id",
-          as: "membershipDetails",
-        },
-      },
-      {
-        $lookup: {
-          from: "regulerservices", // Updated model name
-          localField: "service.serviceId",
-          foreignField: "_id",
-          as: "serviceDetails",
-        },
-      },
-      {
-        $lookup: {
-          from: "carmodels", // Updated model name
-          localField: "carId",
-          foreignField: "_id",
-          as: "carDetails",
-        },
+          as: "membershipDetail"
+        }
       },
       {
         $project: {
-          carModelName: { $arrayElemAt: ["$carModel.modelName", 0] },
-          membershipDetails: 1,
-          userName: { $arrayElemAt: ["$userDetails.name", 0] },
-          userPhone: { $arrayElemAt: ["$userDetails.phoneNo", 0] },
-        },
-      },
+          userName: { $arrayElemAt: ["$user.name", 0] },
+          phoneNo: { $arrayElemAt: ["$user.phoneNo", 0] },
+          email: { $arrayElemAt: ["$user.email", 0] },
+          membershipTitle: "$membershipDetail.title",
+          totalMonth: "$membershipDetail.totalMonth",
+          car : 1,
+          carNumber: "$carNumber"
+        }
+      }
     ]);
+    // const get = await userMemberShipSchema.find()
+    //   .populate("userId") 
+    //   .populate("memberShipId") 
+    //   .populate("carId");
     if (get.length > 0) {
       return res.status(200).json({
         isSuccess: true,
@@ -4880,7 +4930,7 @@ const uploadXLSXAs = async (req, res, next) => {
       });
       // await addNewCarBrand.save()
     }
-
+    
     return res.status(201).json({
       success: true,
       message: savedData.length + " rows added to the database",
