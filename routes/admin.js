@@ -4323,6 +4323,13 @@ router.post('/getAllDataByServiceStatus', async function (req, res) {
     }
 
     ]);
+
+    get.sort((a, b) => {
+      const dateA = new Date(a.VenderWorkDetails[0].pickupDate);
+      const dateB = new Date(b.VenderWorkDetails[0].pickupDate);
+      return dateB - dateA; // Sort in descending order
+    });
+    
     if (get.length > 0) {
       return res.status(200).json({ IsSuccess: true, count: get.length, Data: get, Message: " Data Found" })
     } else {
