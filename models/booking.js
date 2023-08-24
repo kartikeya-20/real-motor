@@ -42,7 +42,7 @@ const booking = mongoose.Schema({
     // 1 Active
     // 2 Completed
     // 3 Cancelled
-    trackBooking: {
+    trackBooking: { 
         type: Number,
         default: 0
     },

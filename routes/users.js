@@ -8806,9 +8806,11 @@ router.post("/getUseDiscoutCoupon", async function (req, res) {
         },
       },
     ]);
-    console.log(get);
-
-    if (discount[0].chackMemberShip == get[0].memberShipStatus) {
+    // console.log(get);
+    console.log(discount[0].chackMemberShip);
+    console.log(get[0].memberShipStatus);
+    // here we have membership status as 0 which denote that user don't have membership
+    if (get[0].memberShipStatus == 0) {
       if (parseInt(discount[0].minimumAmount) <= parseInt(amount)) {
         const discount = await discountCouponSchema.aggregate([
           {
@@ -11391,6 +11393,7 @@ router.post("/getAllBookingHistory_v1", async function (req, res) {
           address: 1,
           instruction: 1,
           bookingId: 1,
+          trackBooking : 1
         },
       },
     ]);

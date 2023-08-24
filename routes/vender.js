@@ -398,13 +398,19 @@ router.post('/getVenderBookingList', async function (req, res) {
         "bookingDetails.long": 1,
         "bookingDetails._id": 1,
         "bookingDetails.bookingId": 1,
-        "verified": 1
+        "verified": 1,
+        "bookingDetails.dateTime" : 1
 
         // "userDetails":1
       }
     }
     ]);
 
+    get.sort((a, b) => {
+      const dateA = parseDate(a.bookingDetails.dateTime[0]); 
+      const dateB = parseDate(b.bookingDetails.dateTime[0]); 
+      return dateB - dateA; // Sort in descending order
+    });
     console.log(get)
     if (get.length > 0) {
 
@@ -2468,6 +2474,11 @@ router.post('/getJobCartWithVenderId', async function (req, res) {
 
     ]);
 
+    get.sort((a, b) => {
+      const dateA = parseDate(a.dateTime[0]); 
+      const dateB = parseDate(b.dateTime[0]); 
+      return dateB - dateA; // Sort in descending order
+    });
 
     if (get.length > 0) {
       return res.status(200).json({ IsSuccess: true, count: get.length, Data: get, Message: "Data Found" })
@@ -2499,8 +2510,13 @@ router.post('/getVenderNotification', async function (req, res) {
 
 
     ]);
-
-
+    
+    get.sort((a, b) => {
+      const dateA = parseDate(a.date);
+      const dateB = parseDate(b.date);
+      return dateB - dateA; // Sort in descending order
+    });
+    
     if (get.length > 0) {
       return res.status(200).json({ IsSuccess: true, count: get.length, Data: get, Message: "Data Found" })
     } else {
@@ -2513,7 +2529,13 @@ router.post('/getVenderNotification', async function (req, res) {
   }
 });
 
-
+function parseDate(dateString) {
+  const parts = dateString.split('/'); // Split the date string
+  const day = parseInt(parts[0], 10);
+  const month = parseInt(parts[1], 10) - 1; // Month is 0-based
+  const year = parseInt(parts[2], 10);
+  return new Date(year, month, day);
+}
 function getCurrentDateTime() {
   let date = moment()
     .tz("Asia/Calcutta")
